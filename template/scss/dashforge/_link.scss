@@ -1,0 +1,26 @@
+
+.link-01 {
+  color: $color-text-01;
+
+  &:hover,
+  &:focus { color: $color-brand-01; }
+}
+
+.link-02 {
+  color: $color-text-02;
+
+  &:hover,
+  &:focus { color: $color-text-01; }
+}
+
+.link-03 {
+  color: $color-text-03;
+
+  &:hover,
+  &:focus { color: $color-text-02; }
+}
+
+.hover-primary {
+  &:hover,
+  &:focus { color: $color-brand-01; }
+}
