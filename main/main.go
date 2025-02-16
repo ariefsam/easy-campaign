@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -14,12 +16,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	godotenv.Load()
 	mux := http.NewServeMux()
 
 	mux.Handle("/", http.FileServer(http.Dir("template")))
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	server := &http.Server{
-		Addr:         ":8080",
+		Addr:         ":",
 		Handler:      mux,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -28,7 +35,7 @@ func main() {
 
 	// Run server in a goroutine so it doesn't block shutdown handling
 	go func() {
-		fmt.Println("Server is running on port 8080")
+		fmt.Println("Server is running on port " + server.Addr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			fmt.Println("Error starting server:", err)
 		}
