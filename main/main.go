@@ -26,7 +26,7 @@ func main() {
 		port = "8080"
 	}
 	server := &http.Server{
-		Addr:         ":",
+		Addr:         ":" + port,
 		Handler:      mux,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
