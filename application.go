@@ -1,11 +1,13 @@
 package campaign
 
+import "context"
+
 type Application struct {
 	Event Event `json:"event"`
 	API   API   `json:"api"`
 }
 
-type Step func(payload *Request, state *InternalState, resp *Response) (err error)
+type Step func(ctx context.Context, payload *Request, state *InternalState, resp *Response) (err error)
 
 type InternalState struct {
 }

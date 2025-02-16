@@ -1,25 +1,53 @@
 package main
 
 import (
+	"campaign"
+	"campaign/logger"
+	"campaign/session"
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
+	"github.com/gorilla/mux"
+
 	"github.com/joho/godotenv"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, World!")
+type campaignHandler struct {
+	authService *campaign.AuthService
 }
 
 func main() {
 	godotenv.Load()
-	mux := http.NewServeMux()
 
-	mux.Handle("/", http.FileServer(http.Dir("template")))
+	authService, err := campaign.NewAuthService()
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+
+	session, err := session.New()
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+
+	log.Println(session)
+
+	handler := &campaignHandler{
+		authService: authService,
+	}
+
+	mux := mux.NewRouter()
+
+	mux.HandleFunc("/login", loginView).Methods("GET")
+	mux.HandleFunc("/login", handler.loginPost).Methods("POST")
+
+	mux.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("template"))))
 
 	port := os.Getenv("PORT")
 	if port == "" {

@@ -14,7 +14,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type authService struct {
+type AuthService struct {
 	eventStore     eventStore
 	idGenerator    idGenerator
 	tokenGenerator tokenGenerator
@@ -49,14 +49,14 @@ type tokenParser interface {
 	Parse(ctx context.Context, tokenString string) (session *dto.Session, err error)
 }
 
-func NewAuthService() (a *authService, err error) {
+func NewAuthService() (a *AuthService, err error) {
 	ctx := context.TODO()
 
 	idGenerator := idgenerator.New()
 	tokenService := token.New()
 	eventStore, _ := eventstore.New(ctx)
 
-	return &authService{
+	return &AuthService{
 		eventStore:     eventStore,
 		idGenerator:    idGenerator,
 		tokenGenerator: tokenService,
@@ -64,23 +64,23 @@ func NewAuthService() (a *authService, err error) {
 	}, nil
 }
 
-func (auth *authService) SetEventStore(eventStore eventStore) {
+func (auth *AuthService) SetEventStore(eventStore eventStore) {
 	auth.eventStore = eventStore
 }
 
-func (auth *authService) SetTokenParser(tokenParser tokenParser) {
+func (auth *AuthService) SetTokenParser(tokenParser tokenParser) {
 	auth.tokenParser = tokenParser
 }
 
-func (auth *authService) SetTokenGenerator(tokenGenerator tokenGenerator) {
+func (auth *AuthService) SetTokenGenerator(tokenGenerator tokenGenerator) {
 	auth.tokenGenerator = tokenGenerator
 }
 
-func (auth *authService) SetIDGenerator(idGenerator idGenerator) {
+func (auth *AuthService) SetIDGenerator(idGenerator idGenerator) {
 	auth.idGenerator = idGenerator
 }
 
-func (auth *authService) Login(ctx context.Context, payload *Request, state *InternalState, resp *Response) (err error) {
+func (auth *AuthService) Login(ctx context.Context, payload *Request, state *InternalState, resp *Response) (err error) {
 	adminEmail := os.Getenv("ADMIN_EMAIL")
 	adminBcryptPassword := os.Getenv("ADMIN_BCRYPT_PASSWORD")
 

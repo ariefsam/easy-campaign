@@ -145,6 +145,9 @@ func (es *eventStoreService) StoreEvent(ctx context.Context) {
 		})
 
 		if resp.Err() != nil {
+			if resp.Err() == redis.Nil {
+				return
+			}
 			logger.Println("failed to read group: ", resp.Err())
 			time.Sleep(1 * time.Second)
 			continue
