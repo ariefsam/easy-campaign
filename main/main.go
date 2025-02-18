@@ -44,6 +44,8 @@ func main() {
 
 	mux := mux.NewRouter()
 
+	mux.HandleFunc("/campaign", campaignView).Methods("GET")
+
 	mux.HandleFunc("/login", loginView).Methods("GET")
 	mux.HandleFunc("/login", handler.stepHandler([]campaign.Step{
 		authService.Login,
