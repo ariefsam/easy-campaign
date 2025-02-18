@@ -95,7 +95,6 @@ func (es *eventStoreService) Save(ctx context.Context, eventData dto.Event) (err
 		return
 	}
 
-	logger.PrintJSON(string(jsonData))
 	return
 }
 

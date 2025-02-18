@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
+	"time"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -27,23 +28,52 @@ func loginView(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *campaignHandler) loginPost(w http.ResponseWriter, r *http.Request) {
+// func (h *campaignHandler) loginPost(w http.ResponseWriter, r *http.Request) {
 
-	payload := campaign.Request{}
-	json.NewDecoder(r.Body).Decode(&payload)
+// 	payload := campaign.Request{}
+// 	json.NewDecoder(r.Body).Decode(&payload)
 
-	resp, err := runStep(r.Context(), &payload, []campaign.Step{h.authService.Login})
-	if err != nil {
-		jsonError(w, err, http.StatusInternalServerError)
-		return
-	}
+// 	resp, err := runStep(r.Context(), &payload, []campaign.Step{h.authService.Login})
+// 	if err != nil {
+// 		jsonError(w, err, http.StatusInternalServerError)
+// 		return
+// 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		logger.Println(err)
-		jsonError(w, err, http.StatusInternalServerError)
+// 	w.Header().Set("Content-Type", "application/json")
+// 	w.WriteHeader(http.StatusOK)
+// 	err = json.NewEncoder(w).Encode(resp)
+// 	if err != nil {
+// 		logger.Println(err)
+// 		jsonError(w, err, http.StatusInternalServerError)
+// 	}
+// }
+
+func (h *campaignHandler) stepHandler(steps []campaign.Step) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		payload := campaign.Request{}
+		json.NewDecoder(r.Body).Decode(&payload)
+
+		resp, err := runStep(r.Context(), &payload, steps)
+		if err != nil {
+			jsonError(w, err, http.StatusInternalServerError)
+			return
+		}
+
+		if resp.Auth.Token != "" {
+			http.SetCookie(w, &http.Cookie{
+				Name:    "token",
+				Value:   resp.Auth.Token,
+				Expires: time.Now().Add(24 * time.Hour),
+			})
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(w).Encode(resp)
+		if err != nil {
+			logger.Println(err)
+			jsonError(w, err, http.StatusInternalServerError)
+		}
 	}
 }
 

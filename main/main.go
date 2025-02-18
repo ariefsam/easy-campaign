@@ -45,7 +45,9 @@ func main() {
 	mux := mux.NewRouter()
 
 	mux.HandleFunc("/login", loginView).Methods("GET")
-	mux.HandleFunc("/login", handler.loginPost).Methods("POST")
+	mux.HandleFunc("/login", handler.stepHandler([]campaign.Step{
+		authService.Login,
+	})).Methods("POST")
 
 	mux.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("template"))))
 
