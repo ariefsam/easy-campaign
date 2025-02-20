@@ -1,6 +1,9 @@
 package dto
 
-import "reflect"
+import (
+	"reflect"
+	"time"
+)
 
 type Event struct {
 	User struct {
@@ -51,6 +54,33 @@ type Event struct {
 			APIRawResponse    string `json:"api_response,omitzero"`
 		} `json:"account_updated,omitzero"`
 	} `json:"instagram_account,omitzero"`
+	Campaign struct {
+		CampaignCreated struct {
+			CampaignID  uint      `json:"campaign_id,omitzero"`
+			UserID      string    `json:"user_id,omitzero"`
+			Name        string    `json:"name,omitzero"`
+			Description string    `json:"description,omitzero"`
+			StartDate   time.Time `json:"start_date,omitzero"`
+			EndDate     time.Time `json:"end_date,omitzero"`
+			Budget      int64     `json:"budget,omitzero"`
+		} `json:"campaign_created,omitzero"`
+		CampaignUpdated struct {
+			CampaignID      uint      `json:"campaign_id,omitzero"`
+			UserID          string    `json:"user_id,omitzero"`
+			Name            string    `json:"name,omitzero"`
+			Description     string    `json:"description,omitzero"`
+			StartDate       time.Time `json:"start_date,omitzero"`
+			EndDate         time.Time `json:"end_date,omitzero"`
+			Budget          int64     `json:"budget,omitzero"`
+			ChangeStartDate time.Time `json:"change_start_date,omitzero"`
+			ChangeEndDate   time.Time `json:"change_end_date,omitzero"`
+			ChangeBudget    int64     `json:"change_budget,omitzero"`
+			Status          string    `json:"status,omitzero"`
+		} `json:"campaign_updated,omitzero"`
+		CampaignDeleted struct {
+			CampaignID uint `json:"campaign_id,omitzero"`
+		} `json:"campaign_deleted,omitzero"`
+	} `json:"campaign,omitzero"`
 }
 
 func ExtractEvent(event any) (entityName string, eventName string) {

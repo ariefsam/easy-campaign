@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Campaign Admin</title>
+    <!-- vendor css -->
+    <link href="../../lib/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="../../lib/typicons.font/src/font/typicons.css" rel="stylesheet">
+    <link href="../../lib/remixicon/fonts/remixicon.css" rel="stylesheet">
+    <link href="../../lib/prismjs/themes/prism-vs.css" rel="stylesheet">
+    <link href="../../lib/datatables.net-dt/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="../../lib/datatables.net-responsive-dt/css/responsive.dataTables.min.css" rel="stylesheet">
+    <link href="../../lib/select2/css/select2.min.css" rel="stylesheet">
+
+    <!-- DashForge CSS -->
+    <link rel="stylesheet" href="../../assets/css/dashforge.css">
+		<link rel="stylesheet" href="../../assets/css/dashforge.demo.css">
+
+  </head>
+  <body>
+    <div class="demo-modal-btn">
+      <a href="#modal7" class="btn btn-dark" data-bs-toggle="modal">View Modal</a>
+    </div>
+    <div data-label="Data" class="df-example demo-table">
+      <table id="example4" class="table">
+        <thead>
+          <tr>
+            <th class="wd-20p">Name</th>
+            <th class="wd-25p">Position</th>
+            <th class="wd-20p">Office</th>
+            <th class="wd-10p">Extn</th>
+            <th class="wd-20p">Salary</th>
+            <th class="wd-5p">Action</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="modal" id="modal7" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel7" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content tx-14">
+          <div class="modal-header">
+            <h6 class="modal-title" id="exampleModalLabel7">Modal Title</h6>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true"></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form action="campaign.html" data-parsley-validate>
+              <div class="form-group">
+                <label for="formGroupExampleInput1" class="d-block">Firstname: <span class="tx-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="Enter your firstname" required>
+              </div>
+              <div class="form-group">
+                <label for="formGroupExampleInput2" class="d-block">Lastname</label>
+                <textarea type="text" class="form-control" rows="2" placeholder="Textarea"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="formGroupExampleInput3" class="d-block">Start Date: <span class="tx-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="Choose date" id="datepicker5">
+              </div>
+              <button class="btn btn-primary" type="submit">Submit</button>
+              <button class="btn btn-secondary" type="cancel" data-bs-dismiss="modal">Cancel</button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary tx-13" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary tx-13">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../../lib/jquery/jquery.min.js"></script>
+    <script src="../../lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../../lib/feather-icons/feather.min.js"></script>
+    <script src="../../lib/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="../../lib/prismjs/prism.js"></script>
+    <script src="../../lib/parsleyjs/parsley.min.js"></script>
+    <script src="../../lib/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="../../lib/datatables.net-dt/js/dataTables.dataTables.min.js"></script>
+    <script src="../../lib/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="../../lib/datatables.net-responsive-dt/js/responsive.dataTables.min.js"></script>
+    <script src="../../lib/select2/js/select2.min.js"></script>
+
+    <script src="../../assets/js/dashforge.js"></script>
+    <script>
+      $(function(){
+        'use strict'
+
+        $('#example4').DataTable({
+          responsive: true,
+          'ajax': '../assets/data/datatable-objects.txt',
+          "columns": [
+            { "data": "name" },
+            { "data": "position" },
+            { "data": "office" },
+            { "data": "extn" },
+            { "data": "salary" },
+            { "data": null,
+              "render": function(data, type, row) {
+                return `
+                <button class="btn btn-sm btn-primary edit-btn" data-id="${row.id}">Edit</button>
+                <button class="btn btn-sm btn-danger delete-btn" data-id="${row.id}">Delete</button>
+              `;
+            }
+            }
+          ],
+          language: {
+            searchPlaceholder: 'Search...',
+            sSearch: '',
+            lengthMenu: '_MENU_ items/page',
+          }
+        });
+
+        // Select2
+        $('.dataTables_length select').select2({ minimumResultsForSearch: Infinity });
+
+      });
+    </script>
+  </body>
+</html>
