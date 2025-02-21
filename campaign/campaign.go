@@ -107,7 +107,7 @@ func (c *campaignService) Project(ctx context.Context, eventID string, event dto
 
 func (c *campaignService) campaignDeleted(ctx context.Context, eventID string, event dto.Event, dateTime time.Time) (err error) {
 	err = c.db.WithContext(ctx).Transaction(func(tx *gorm.DB) (err error) {
-		campaignID := event.Campaign.CampaignDeleted.CampaignID
+		campaignID := event.Campaign.CampaignDeleted.ID
 
 		err = tx.Delete(&Campaign{}, campaignID).Error
 		if err != nil {
@@ -167,7 +167,7 @@ func (c *campaignService) campaignCreated(ctx context.Context, eventID string, e
 
 func (c *campaignService) campaignUpdated(ctx context.Context, eventID string, event dto.Event, dateTime time.Time) (err error) {
 	err = c.db.WithContext(ctx).Transaction(func(tx *gorm.DB) (err error) {
-		campaignID := event.Campaign.CampaignUpdated.CampaignID
+		campaignID := event.Campaign.CampaignUpdated.ID
 
 		updatedData := Campaign{
 			UserID:          event.Campaign.CampaignUpdated.UserID,
@@ -211,6 +211,15 @@ func (c *campaignService) GetCampaign(ctx context.Context, id uint) (campaign *C
 		err = errors.Wrap(err, "failed to get campaign")
 		logger.Println(err)
 		return
+	}
+	return
+}
+
+func (c *campaignService) GetAllCampaigns(ctx context.Context) (campaigns []Campaign, err error) {
+	err = c.db.WithContext(ctx).Find(&campaigns).Error
+	if err != nil {
+		err = errors.Wrap(err, "failed to get all campaigns")
+		logger.Println(err)
 	}
 	return
 }
