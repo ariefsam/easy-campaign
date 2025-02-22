@@ -1,6 +1,7 @@
-package apperror
+package helper
 
 import (
+	"campaign/apperror"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -13,7 +14,7 @@ func HandleError(w http.ResponseWriter, err error) {
 		"error": true,
 	}
 
-	var customError *CustomError
+	var customError *apperror.CustomError
 	if errors.As(err, &customError) {
 		response["message"] = customError.Error()
 		w.WriteHeader(customError.Code)
@@ -22,6 +23,5 @@ func HandleError(w http.ResponseWriter, err error) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	//nolint:errcheck
-	json.NewEncoder(w).Encode(response) //nolint:errchkjson
+	json.NewEncoder(w).Encode(response)
 }

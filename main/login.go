@@ -2,7 +2,7 @@ package main
 
 import (
 	"campaign"
-	"campaign/apperror"
+	"campaign/helper"
 	"campaign/logger"
 	"context"
 	"encoding/json"
@@ -64,7 +64,7 @@ func (h *campaignHandler) stepHandler(steps []campaign.Step) func(w http.Respons
 
 		resp, err := runStep(r.Context(), &payload, state, steps)
 		if err != nil {
-			apperror.HandleError(w, err)
+			helper.HandleError(w, err)
 			// jsonError(w, err, http.StatusInternalServerError)
 			return
 		}
