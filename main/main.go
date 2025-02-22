@@ -1,7 +1,9 @@
 package main
 
 import (
-	"campaign"
+	campaign "campaign"
+	campaignRepo "campaign/campaign"
+
 	"campaign/logger"
 	"campaign/session"
 	"context"
@@ -43,34 +45,42 @@ func main() {
 		logger.Println(err)
 		return
 	}
-
 	log.Println(session)
 
 	influencerService := campaign.NewInfluencerService()
+	campaignData, err := campaignRepo.New()
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+	log.Println(campaignData)
 
 	handler := &campaignHandler{
 		authService:     authService,
 		campaignService: campaignService,
 	}
 
-	h := campaign.NewCampaignHandler(campaignService)
-
 	mux := mux.NewRouter()
 
 	mux.HandleFunc("/campaign", campaignView).Methods("GET")
 
-	mux.HandleFunc("/campaign/{id:[0-9]+}", h.DeleteCampaign).Methods("DELETE")
-	mux.HandleFunc("/campaign/{id:[0-9]+}", h.GetCampaign).Methods("GET")
+	mux.HandleFunc("/campaign/{id:[0-9]+}", handler.stepHandler([]campaign.Step{
+		campaignService.GetCampaign,
+	})).Methods("GET")
 
-	mux.HandleFunc("/campaigns", handler.stepHandler([]campaign.Step{
+	mux.HandleFunc("/campaign/{id:[0-9]+}", handler.stepHandler([]campaign.Step{
+		campaignService.DeleteCampaign,
+	})).Methods("DELETE")
+
+	mux.HandleFunc("/campaign/create", handler.stepHandler([]campaign.Step{
 		campaignService.CreateCampaign,
 	})).Methods("POST")
 
-	mux.HandleFunc("/campaigns", handler.stepHandler([]campaign.Step{
+	mux.HandleFunc("/campaign/update", handler.stepHandler([]campaign.Step{
 		campaignService.UpdateCampaign,
-	})).Methods("PUT")
+	})).Methods("POST")
 
-	mux.HandleFunc("/campaigns", handler.stepHandler([]campaign.Step{
+	mux.HandleFunc("/campaign/list", handler.stepHandler([]campaign.Step{
 		campaignService.GetAllCampaigns,
 	})).Methods("GET")
 

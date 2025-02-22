@@ -2,6 +2,7 @@ package main
 
 import (
 	"campaign"
+	"campaign/apperror"
 	"campaign/logger"
 	"context"
 	"encoding/json"
@@ -9,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -33,6 +35,21 @@ func (h *campaignHandler) stepHandler(steps []campaign.Step) func(w http.Respons
 		payload := campaign.Request{}
 		json.NewDecoder(r.Body).Decode(&payload)
 
+		queryParams := r.URL.Query()
+		payload.QueryParams = make(map[string]string)
+		for key, values := range queryParams {
+			if len(values) > 0 {
+				payload.QueryParams[key] = values[0]
+			}
+		}
+
+		vars := mux.Vars(r)
+		inputID := vars["id"]
+
+		if inputID != "" {
+			payload.QueryParams["id"] = inputID
+		}
+
 		cookieToken, err := r.Cookie("token")
 		state := &campaign.InternalState{}
 		if err == nil {
@@ -47,7 +64,8 @@ func (h *campaignHandler) stepHandler(steps []campaign.Step) func(w http.Respons
 
 		resp, err := runStep(r.Context(), &payload, state, steps)
 		if err != nil {
-			jsonError(w, err, http.StatusInternalServerError)
+			apperror.HandleError(w, err)
+			// jsonError(w, err, http.StatusInternalServerError)
 			return
 		}
 
