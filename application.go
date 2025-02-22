@@ -13,6 +13,9 @@ type Application struct {
 type Step func(ctx context.Context, payload *Request, state *InternalState, resp *Response) (err error)
 
 type InternalState struct {
+	Session struct {
+		UserID string
+	}
 }
 
 type Response struct {
@@ -51,6 +54,10 @@ type Response struct {
 		CreatedAt       time.Time `json:"created_at,omitempty"`
 		UpdatedAt       time.Time `json:"updated_at,omitempty"`
 	} `json:"campaigns,omitempty"`
+	Influencer struct {
+		InfluencerID string `json:"influencer_id,omitzero"`
+		Name         string `json:"name,omitzero"`
+	}
 }
 
 // func StepLogin

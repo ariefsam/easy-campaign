@@ -15,8 +15,11 @@ type Endpoint struct {
 }
 
 type Request struct {
-	QueryParams map[string]string `json:"query_params,omitzero"`
-	Login       struct {
+	QueryParams             map[string]string `json:"query_params,omitzero"`
+	CreateInfluencerRequest struct {
+		Name string `json:"name,omitzero"`
+	} `json:"create_influencer_request,omitzero"`
+	Login struct {
 		Email       string `json:"email,omitzero"`
 		Password    string `json:"password,omitzero"`
 		Device      string `json:"device,omitzero"`

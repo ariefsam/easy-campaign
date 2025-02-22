@@ -42,6 +42,13 @@ type Event struct {
 			Email   string `json:"email,omitzero"`
 		} `json:"login_succeeded,omitzero"`
 	} `json:"session,omitzero"`
+	Influencer struct {
+		InfluencerCreated struct {
+			InfluencerID string `json:"influencer_id,omitzero"`
+			Name         string `json:"name,omitzero"`
+			CreatedBy    string `json:"created_by,omitzero"`
+		} `json:"influencer_created,omitzero"`
+	} `json:"influencer,omitzero"`
 	InstagramAccount struct {
 		AccountCreated struct {
 			InstagramID       string `json:"instagram_id,omitzero"`
