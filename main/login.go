@@ -33,7 +33,19 @@ func (h *campaignHandler) stepHandler(steps []campaign.Step) func(w http.Respons
 		payload := campaign.Request{}
 		json.NewDecoder(r.Body).Decode(&payload)
 
-		resp, err := runStep(r.Context(), &payload, steps)
+		cookieToken, err := r.Cookie("token")
+		state := &campaign.InternalState{}
+		if err == nil {
+			session, err := h.authService.ParseToken(r.Context(), cookieToken.Value)
+			if err != nil {
+				logger.Println(err)
+			}
+			if session != nil {
+				state.Session.UserID = session.Subject
+			}
+		}
+
+		resp, err := runStep(r.Context(), &payload, state, steps)
 		if err != nil {
 			jsonError(w, err, http.StatusInternalServerError)
 			return
@@ -66,11 +78,10 @@ func jsonError(w http.ResponseWriter, err error, code int) {
 	})
 }
 
-func runStep(ctx context.Context, payload *campaign.Request, step []campaign.Step) (resp campaign.Response, err error) {
-	state := campaign.InternalState{}
+func runStep(ctx context.Context, payload *campaign.Request, state *campaign.InternalState, step []campaign.Step) (resp campaign.Response, err error) {
 
 	for _, s := range step {
-		err = s(ctx, payload, &state, &resp)
+		err = s(ctx, payload, state, &resp)
 		if err != nil {
 			logger.Println(err)
 			return

@@ -15,6 +15,9 @@ type Endpoint struct {
 }
 
 type Request struct {
+	CreateInfluencerRequest struct {
+		Name string `json:"name,omitzero"`
+	} `json:"create_influencer_request,omitzero"`
 	Login struct {
 		Email       string `json:"email,omitzero"`
 		Password    string `json:"password,omitzero"`
