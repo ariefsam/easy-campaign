@@ -18,7 +18,8 @@ import (
 )
 
 type campaignHandler struct {
-	authService *campaign.AuthService
+	authService       *campaign.AuthService
+	influencerService *campaign.InfluencerService
 }
 
 func main() {
@@ -38,6 +39,8 @@ func main() {
 
 	log.Println(session)
 
+	influencerService := campaign.NewInfluencerService()
+
 	handler := &campaignHandler{
 		authService: authService,
 	}
@@ -49,6 +52,9 @@ func main() {
 	mux.HandleFunc("/login", loginView).Methods("GET")
 	mux.HandleFunc("/login", handler.stepHandler([]campaign.Step{
 		authService.Login,
+	})).Methods("POST")
+	mux.HandleFunc("/influencer/create", handler.stepHandler([]campaign.Step{
+		influencerService.CreateInfluencer,
 	})).Methods("POST")
 
 	mux.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("template"))))

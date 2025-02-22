@@ -28,26 +28,6 @@ func loginView(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// func (h *campaignHandler) loginPost(w http.ResponseWriter, r *http.Request) {
-
-// 	payload := campaign.Request{}
-// 	json.NewDecoder(r.Body).Decode(&payload)
-
-// 	resp, err := runStep(r.Context(), &payload, []campaign.Step{h.authService.Login})
-// 	if err != nil {
-// 		jsonError(w, err, http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.WriteHeader(http.StatusOK)
-// 	err = json.NewEncoder(w).Encode(resp)
-// 	if err != nil {
-// 		logger.Println(err)
-// 		jsonError(w, err, http.StatusInternalServerError)
-// 	}
-// }
-
 func (h *campaignHandler) stepHandler(steps []campaign.Step) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		payload := campaign.Request{}
