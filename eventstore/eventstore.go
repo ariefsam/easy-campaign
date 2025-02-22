@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -63,10 +64,14 @@ func New(ctx context.Context) (es *eventStoreService, err error) {
 		logger.Println(err)
 	}
 
-	go es.StoreEvent(ctx)
+	once.Do(func() {
+		go es.StoreEvent(ctx)
+	})
 
 	return
 }
+
+var once sync.Once
 
 func (es *eventStoreService) Save(ctx context.Context, eventData dto.Event) (err error) {
 	jsonData, err := json.Marshal(eventData)
