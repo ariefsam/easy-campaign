@@ -56,7 +56,7 @@ type Event struct {
 	} `json:"instagram_account,omitzero"`
 	Campaign struct {
 		CampaignCreated struct {
-			CampaignID  uint      `json:"campaign_id,omitzero"`
+			ID          uint      `json:"id,omitzero"`
 			UserID      string    `json:"user_id,omitzero"`
 			Name        string    `json:"name,omitzero"`
 			Description string    `json:"description,omitzero"`
@@ -65,7 +65,7 @@ type Event struct {
 			Budget      int64     `json:"budget,omitzero"`
 		} `json:"campaign_created,omitzero"`
 		CampaignUpdated struct {
-			CampaignID      uint      `json:"campaign_id,omitzero"`
+			ID              uint      `json:"id,omitzero"`
 			UserID          string    `json:"user_id,omitzero"`
 			Name            string    `json:"name,omitzero"`
 			Description     string    `json:"description,omitzero"`
@@ -78,7 +78,7 @@ type Event struct {
 			Status          string    `json:"status,omitzero"`
 		} `json:"campaign_updated,omitzero"`
 		CampaignDeleted struct {
-			CampaignID uint `json:"campaign_id,omitzero"`
+			ID uint `json:"id,omitzero"`
 		} `json:"campaign_deleted,omitzero"`
 	} `json:"campaign,omitzero"`
 }
