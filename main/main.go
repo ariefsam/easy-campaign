@@ -18,13 +18,20 @@ import (
 )
 
 type campaignHandler struct {
-	authService *campaign.AuthService
+	authService     *campaign.AuthService
+	campaignService *campaign.CampaignService
 }
 
 func main() {
 	godotenv.Load()
 
 	authService, err := campaign.NewAuthService()
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+
+	campaignService, err := campaign.NewCampaignService()
 	if err != nil {
 		logger.Println(err)
 		return
@@ -39,12 +46,30 @@ func main() {
 	log.Println(session)
 
 	handler := &campaignHandler{
-		authService: authService,
+		authService:     authService,
+		campaignService: campaignService,
 	}
+
+	h := campaign.NewCampaignHandler(campaignService)
 
 	mux := mux.NewRouter()
 
 	mux.HandleFunc("/campaign", campaignView).Methods("GET")
+
+	mux.HandleFunc("/campaign/{id:[0-9]+}", h.DeleteCampaign).Methods("DELETE")
+	mux.HandleFunc("/campaign/{id:[0-9]+}", h.GetCampaign).Methods("GET")
+
+	mux.HandleFunc("/campaigns", handler.stepHandler([]campaign.Step{
+		campaignService.CreateCampaign,
+	})).Methods("POST")
+
+	mux.HandleFunc("/campaigns", handler.stepHandler([]campaign.Step{
+		campaignService.UpdateCampaign,
+	})).Methods("PUT")
+
+	mux.HandleFunc("/campaigns", handler.stepHandler([]campaign.Step{
+		campaignService.GetAllCampaigns,
+	})).Methods("GET")
 
 	mux.HandleFunc("/login", loginView).Methods("GET")
 	mux.HandleFunc("/login", handler.stepHandler([]campaign.Step{
