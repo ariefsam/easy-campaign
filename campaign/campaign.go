@@ -1,10 +1,10 @@
 package campaign
 
 import (
+	"campaign/apperror"
 	"campaign/dto"
 	"campaign/logger"
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -60,24 +60,6 @@ func New() (s *campaignService, err error) {
 		return
 	}
 
-	newCampaign := Campaign{
-		Name:            "Campaign A",
-		Description:     "Deskripsi campaign A",
-		StartDate:       time.Now(),
-		EndDate:         time.Now().AddDate(0, 1, 0), // 1 bulan kemudian
-		Budget:          1000,
-		Status:          "active",
-		ChangeStartDate: time.Now(),
-		ChangeEndDate:   time.Now().AddDate(0, 0, 15), // 15 hari kemudian
-		ChangeBudget:    500,
-	}
-
-	if err := s.db.Create(&newCampaign).Error; err != nil {
-		fmt.Println("Error creating campaign:", err)
-	} else {
-		fmt.Println("Campaign created:", newCampaign)
-	}
-
 	cursor := Cursor{}
 
 	s.db.First(&cursor)
@@ -111,14 +93,16 @@ func (c *campaignService) campaignDeleted(ctx context.Context, eventID string, e
 
 		err = tx.Delete(&Campaign{}, campaignID).Error
 		if err != nil {
-			err = errors.Wrap(err, "failed to delete campaign")
+			err = apperror.NewCustomError(500, "failed to delete campaign", err)
+			// err = errors.Wrap(err, "failed to delete campaign")
 			logger.Println(err)
 			return
 		}
 
 		resp := tx.Model(&Cursor{}).Where("1 = 1").Update("EventID", eventID)
 		if resp.Error != nil {
-			err = errors.Wrap(resp.Error, "failed to update cursor")
+			err = apperror.NewCustomError(500, "failed to update cursor", resp.Error)
+			// err = errors.Wrap(resp.Error, "failed to update cursor")
 			logger.Println(err)
 			return
 		}
@@ -145,14 +129,16 @@ func (c *campaignService) campaignCreated(ctx context.Context, eventID string, e
 
 		err = tx.Create(&data).Error
 		if err != nil {
-			err = errors.Wrap(err, "failed to create campaign")
+			// err = errors.Wrap(err, "failed to create campaign")
+			err = apperror.NewCustomError(500, "failed to create campaign", err)
 			logger.Println(err)
 			return
 		}
 
 		resp := tx.Model(&Cursor{}).Where("1 = 1").Update("EventID", eventID)
 		if resp.Error != nil {
-			err = errors.Wrap(resp.Error, "failed to update cursor")
+			// err = errors.Wrap(resp.Error, "failed to update cursor")
+			err = apperror.NewCustomError(500, "failed to update cursor", resp.Error)
 			logger.Println(err)
 			return
 		}
@@ -184,14 +170,16 @@ func (c *campaignService) campaignUpdated(ctx context.Context, eventID string, e
 
 		err = tx.Model(&Campaign{}).Where("id = ?", campaignID).Updates(updatedData).Error
 		if err != nil {
-			err = errors.Wrap(err, "failed to update campaign")
+			err = apperror.NewCustomError(500, "failed to update campaign", err)
+			// err = errors.Wrap(err, "failed to update campaign")
 			logger.Println(err)
 			return
 		}
 
 		resp := tx.Model(&Cursor{}).Where("1 = 1").Update("EventID", eventID)
 		if resp.Error != nil {
-			err = errors.Wrap(resp.Error, "failed to update cursor")
+			err = apperror.NewCustomError(500, "failed to update cursor", resp.Error)
+			// err = errors.Wrap(resp.Error, "failed to update cursor")
 			logger.Println(err)
 			return
 		}
@@ -208,7 +196,8 @@ func (c *campaignService) GetCampaign(ctx context.Context, id uint) (campaign *C
 	campaign = &Campaign{}
 	err = c.db.WithContext(ctx).First(campaign, id).Error
 	if err != nil {
-		err = errors.Wrap(err, "failed to get campaign")
+		err = apperror.NewCustomError(500, "failed to get campaign", err)
+		// err = errors.Wrap(err, "failed to get campaign")
 		logger.Println(err)
 		return
 	}
@@ -218,7 +207,8 @@ func (c *campaignService) GetCampaign(ctx context.Context, id uint) (campaign *C
 func (c *campaignService) GetAllCampaigns(ctx context.Context) (campaigns []Campaign, err error) {
 	err = c.db.WithContext(ctx).Find(&campaigns).Error
 	if err != nil {
-		err = errors.Wrap(err, "failed to get all campaigns")
+		err = apperror.NewCustomError(500, "failed to get all campaign", err)
+		// err = errors.Wrap(err, "failed to get all campaign")
 		logger.Println(err)
 	}
 	return
@@ -229,32 +219,3 @@ func (c *campaignService) GetCursor() (cursor Cursor, err error) {
 	err = c.db.Last(&cursor).Error
 	return
 }
-
-// --- CREATE ---
-
-// 	// --- READ ---
-// 	var campaign Campaign
-// 	// Mencari campaign berdasarkan primary key (ID)
-// 	if err := db.First(&campaign, newCampaign.ID).Error; err != nil {
-// 		fmt.Println("Error reading campaign:", err)
-// 	} else {
-// 		fmt.Println("Campaign found:", campaign)
-// 	}
-
-// 	// --- UPDATE ---
-// 	// Mengupdate nama dan budget campaign
-// 	if err := db.Model(&campaign).Updates(Campaign{Name: "Updated Campaign A", Budget: 2000}).Error; err != nil {
-// 		fmt.Println("Error updating campaign:", err)
-// 	} else {
-// 		// Ambil data terbaru
-// 		db.First(&campaign, campaign.ID)
-// 		fmt.Println("Campaign updated:", campaign)
-// 	}
-
-// 	// --- DELETE ---
-// 	if err := db.Delete(&campaign).Error; err != nil {
-// 		fmt.Println("Error deleting campaign:", err)
-// 	} else {
-// 		fmt.Println("Campaign deleted")
-// 	}
-// }

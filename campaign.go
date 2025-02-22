@@ -6,12 +6,9 @@ import (
 	"campaign/eventstore"
 	"campaign/logger"
 	"context"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 type CampaignService struct {
@@ -171,8 +168,13 @@ func (campaign *CampaignService) UpdateCampaign(ctx context.Context, payload *Re
 	return
 }
 
-func (campaign *CampaignService) GetCampaign(ctx context.Context, id uint, resp *Response) (err error) {
-	campaignData, err := campaign.campaignReader.GetCampaign(ctx, id)
+func (campaign *CampaignService) GetCampaign(ctx context.Context, payload *Request, state *InternalState, resp *Response) (err error) {
+	id, err := strconv.Atoi(payload.QueryParams["id"])
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	campaignData, err := campaign.campaignReader.GetCampaign(ctx, uint(id))
 	if err != nil {
 		logger.Error(err)
 		return
@@ -194,9 +196,14 @@ func (campaign *CampaignService) GetCampaign(ctx context.Context, id uint, resp 
 	return
 }
 
-func (campaign *CampaignService) DeleteCampaign(ctx context.Context, id uint) (err error) {
+func (campaign *CampaignService) DeleteCampaign(ctx context.Context, payload *Request, state *InternalState, resp *Response) (err error) {
+	id, err := strconv.Atoi(payload.QueryParams["id"])
+	if err != nil {
+		logger.Error(err)
+		return
+	}
 	event := dto.Event{}
-	event.Campaign.CampaignDeleted.ID = id
+	event.Campaign.CampaignDeleted.ID = uint(id)
 
 	err = campaign.campaignWriter.Project(ctx, "", event, time.Now())
 	if err != nil {
@@ -209,50 +216,4 @@ func (campaign *CampaignService) DeleteCampaign(ctx context.Context, id uint) (e
 		return
 	}
 	return
-}
-
-type CampaignHandler struct {
-	Service *CampaignService
-}
-
-func NewCampaignHandler(service *CampaignService) CampaignHandler {
-	return CampaignHandler{Service: service}
-}
-
-// GetCampaign Handler
-func (h *CampaignHandler) GetCampaign(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, "Invalid campaign ID", http.StatusBadRequest)
-		return
-	}
-
-	var resp Response
-	err = h.Service.GetCampaign(ctx, uint(id), &resp)
-	if err != nil {
-		http.Error(w, "Campaign not found", http.StatusNotFound)
-		return
-	}
-
-	json.NewEncoder(w).Encode(resp)
-}
-
-func (h *CampaignHandler) DeleteCampaign(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, "Invalid campaign ID", http.StatusBadRequest)
-		return
-	}
-
-	err = h.Service.DeleteCampaign(ctx, uint(id))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
 }

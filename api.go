@@ -15,7 +15,8 @@ type Endpoint struct {
 }
 
 type Request struct {
-	Login struct {
+	QueryParams map[string]string `json:"query_params,omitzero"`
+	Login       struct {
 		Email       string `json:"email,omitzero"`
 		Password    string `json:"password,omitzero"`
 		Device      string `json:"device,omitzero"`

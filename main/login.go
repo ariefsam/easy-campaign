@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -32,6 +33,21 @@ func (h *campaignHandler) stepHandler(steps []campaign.Step) func(w http.Respons
 	return func(w http.ResponseWriter, r *http.Request) {
 		payload := campaign.Request{}
 		json.NewDecoder(r.Body).Decode(&payload)
+
+		queryParams := r.URL.Query()
+		payload.QueryParams = make(map[string]string)
+		for key, values := range queryParams {
+			if len(values) > 0 {
+				payload.QueryParams[key] = values[0]
+			}
+		}
+
+		vars := mux.Vars(r)
+		inputID := vars["id"]
+
+		if inputID != "" {
+			payload.QueryParams["id"] = inputID
+		}
 
 		resp, err := runStep(r.Context(), &payload, steps)
 		if err != nil {
