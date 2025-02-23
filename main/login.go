@@ -33,7 +33,14 @@ func loginView(w http.ResponseWriter, r *http.Request) {
 func (h *campaignHandler) stepHandler(steps []campaign.Step) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		payload := campaign.Request{}
-		json.NewDecoder(r.Body).Decode(&payload)
+		if r.Method == http.MethodPost {
+			err := json.NewDecoder(r.Body).Decode(&payload)
+			if err != nil {
+				logger.Println(err)
+				jsonError(w, err, http.StatusInternalServerError)
+				return
+			}
+		}
 
 		queryParams := r.URL.Query()
 		payload.QueryParams = make(map[string]string)

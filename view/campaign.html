@@ -14,36 +14,28 @@
     <link href="../../lib/prismjs/themes/prism-vs.css" rel="stylesheet">
     <link href="../../lib/datatables.net-dt/css/jquery.dataTables.min.css" rel="stylesheet">
     <link href="../../lib/datatables.net-responsive-dt/css/responsive.dataTables.min.css" rel="stylesheet">
+    <link href="../../lib/ionicons/css/ionicons.min.css" rel="stylesheet">
     <link href="../../lib/select2/css/select2.min.css" rel="stylesheet">
+    <link href="../../lib/jqvmap/jqvmap.min.css" rel="stylesheet">
+
 
     <!-- DashForge CSS -->
     <link rel="stylesheet" href="../../assets/css/dashforge.css">
+    <link rel="stylesheet" href="../../assets/css/dashforge.dashboard.css">
 		<link rel="stylesheet" href="../../assets/css/dashforge.demo.css">
 
+    <style>
+      .ui-datepicker {
+        z-index: 1600 !important; /* has to be larger than 1050 */
+      }
+  </style>
   </head>
   <body>
-    <div class="demo-modal-btn">
-      <a href="#modal7" class="btn btn-dark" data-bs-toggle="modal">View Modal</a>
-    </div>
-    <div data-label="Data" class="df-example demo-table">
-      <table id="example4" class="table">
-        <thead>
-          <tr>
-            <th class="wd-20p">Name</th>
-            <th class="wd-25p">Position</th>
-            <th class="wd-20p">Office</th>
-            <th class="wd-10p">Extn</th>
-            <th class="wd-20p">Salary</th>
-            <th class="wd-5p">Action</th>
-          </tr>
-        </thead>
-      </table>
-    </div>
-    <div class="modal" id="modal7" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel7" aria-hidden="true">
+    <div class="modal fade" id="create" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel7" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content tx-14">
           <div class="modal-header">
-            <h6 class="modal-title" id="exampleModalLabel7">Modal Title</h6>
+            <h6 class="modal-title" id="exampleModalLabel7">Add Campaign</h6>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
               <span aria-hidden="true"></span>
             </button>
@@ -51,29 +43,190 @@
           <div class="modal-body">
             <form action="campaign.html" data-parsley-validate>
               <div class="form-group">
-                <label for="formGroupExampleInput1" class="d-block">Firstname: <span class="tx-danger">*</span></label>
-                <input type="text" class="form-control" placeholder="Enter your firstname" required>
+                <label for="formGroupExampleAdd1" class="d-block">Name<span class="tx-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="Enter campaign name" required>
               </div>
               <div class="form-group">
-                <label for="formGroupExampleInput2" class="d-block">Lastname</label>
-                <textarea type="text" class="form-control" rows="2" placeholder="Textarea"></textarea>
+                <label for="formGroupExampleAdd2" class="d-block">Description<span class="tx-danger">*</span></label>
+                <textarea type="text" class="form-control" rows="2" placeholder="Enter campaign description"></textarea>
               </div>
               <div class="form-group">
-                <label for="formGroupExampleInput3" class="d-block">Start Date: <span class="tx-danger">*</span></label>
-                <input type="text" class="form-control" placeholder="Choose date" id="datepicker5">
+                <label for="formGroupExampleAdd3" class="d-block">Start Date<span class="tx-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="Choose start date" id="datepicker5">
               </div>
-              <button class="btn btn-primary" type="submit">Submit</button>
+              <div class="form-group">
+                <label for="formGroupExampleAdd4" class="d-block">End Date<span class="tx-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="Choose end date" id="datepicker6">
+              </div>
+              <div class="form-group">
+                <label for="formGroupExampleAdd5" class="d-block">Budget<span class="tx-danger">*</span></label>
+                <input id="inputAddBudget" type="text" class="form-control" placeholder="Enter numeral">
+              </div>
+              <button class="btn btn-primary" type="submit">Add Campaign</button>
               <button class="btn btn-secondary" type="cancel" data-bs-dismiss="modal">Cancel</button>
+              <!-- <button type="button" class="btn btn-secondary tx-13" data-bs-dismiss="modal">Close</button> -->
+              <!-- <button class="btn btn-secondary" type="cancel" data-bs-dismiss="modal">Cancel</button> -->
             </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary tx-13" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary tx-13">Save changes</button>
           </div>
         </div>
       </div>
     </div>
+    <div class="modal fade" id="update" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel7" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content tx-14">
+          <div class="modal-header">
+            <h6 class="modal-title" id="exampleModalLabel7">Update Campaign</h6>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true"></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form action="campaign.html" data-parsley-validate>
+              <div class="form-group">
+                <label for="formGroupExampleInput1" class="d-block">Name<span class="tx-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="Enter campaign name" required>
+              </div>
+              <div class="form-group">
+                <label for="formGroupExampleInput2" class="d-block">Description<span class="tx-danger">*</span></label>
+                <textarea type="text" class="form-control" rows="2" placeholder="Enter campaign description"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="formGroupExampleInput3" class="d-block">Start Date<span class="tx-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="Choose start date" id="datepicker1">
+              </div>
+              <div class="form-group">
+                <label for="formGroupExampleInput4" class="d-block">End Date<span class="tx-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="Choose end date" id="datepicker2">
+              </div>
+              <div class="form-group">
+                <label for="formGroupExampleInput5" class="d-block">Budget<span class="tx-danger">*</span></label>
+                <input id="inputBudget" type="text" class="form-control" placeholder="Enter numeral">
+              </div>
+              <div class="form-group">
+                <label for="formGroupExampleInput3" class="d-block">Change Start Date<span class="tx-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="Choose start date" id="datepicker3">
+              </div>
+              <div class="form-group">
+                <label for="formGroupExampleInput4" class="d-block">Change End Date<span class="tx-danger">*</span></label>
+                <input type="text" class="form-control" placeholder="Choose end date" id="datepicker4">
+              </div>
+              <div class="form-group">
+                <label for="formGroupExampleInput5" class="d-block">Change Budget<span class="tx-danger">*</span></label>
+                <input id="inputChangeBudget" type="text" class="form-control" placeholder="Enter numeral">
+              </div>
+              <button class="btn btn-primary" type="submit">Update Campaign</button>
+              <button class="btn btn-secondary" type="cancel" data-bs-dismiss="modal">Cancel</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="modal5" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel5" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content tx-14">
+          <div class="modal-header">
+            <h6 class="modal-title" id="exampleModalLabel5">Delete Campaign</h6>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true"></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p class="mg-b-0">Apakah Anda yakin ingin menghapus campaign dengan ID ${campaignId}?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary tx-13" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-danger tx-13">Delete Campaign</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content content-fixed">
+      <div class="container pd-x-0 pd-lg-x-10 pd-xl-x-0">
+        <div class="d-sm-flex align-items-center justify-content-between mg-b-20 mg-lg-b-25 mg-xl-b-30">
+          <div>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb breadcrumb-style1 mg-b-10">
+                <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Campaign</li>
+              </ol>
+            </nav>
+            <h4 class="mg-b-0 tx-spacing--1">Welcome to Dashboard Campaign</h4>
+          </div>
+          <div class="d-none d-md-block">
+            <button class="btn btn-sm pd-x-15 btn-white btn-uppercase"><i data-feather="mail" class="wd-10 mg-r-5"></i> Email</button>
+            <button class="btn btn-sm pd-x-15 btn-white btn-uppercase mg-l-5"><i data-feather="printer" class="wd-10 mg-r-5"></i> Print</button>
+            <button class="btn btn-sm pd-x-15 btn-primary btn-uppercase mg-l-5" data-bs-toggle="modal" data-bs-target="#create"><i data-feather="file" class="wd-10 mg-r-5"></i> Add Campaign</button>
+          </div>
+        </div>
+        <div class="row row-xs">
+          <div class="col-sm-6 col-lg-3">
+            <div class="card card-body">
+              <h6 class="tx-uppercase tx-11 tx-spacing-1 tx-color-02 tx-semibold mg-b-8">Conversion Rate</h6>
+              <div class="d-flex d-lg-block d-xl-flex align-items-end">
+                <h3 class="tx-normal tx-rubik mg-b-0 mg-r-5 lh-1">0.81%</h3>
+                <p class="tx-11 tx-color-03 mg-b-0"><span class="tx-medium tx-success d-inline-flex align-items-center">1.2% <ion-icon name="arrow-up-outline"></ion-icon></span> than last week</p>
+              </div>
+              <div class="chart-three">
+                <div id="flotChart3" class="flot-chart ht-30"></div>
+              </div>
+            </div>
+          </div><!-- col -->
+          <div class="col-sm-6 col-lg-3 mg-t-10 mg-sm-t-0">
+            <div class="card card-body">
+              <h6 class="tx-uppercase tx-11 tx-spacing-1 tx-color-02 tx-semibold mg-b-8">Unique Purchases</h6>
+              <div class="d-flex d-lg-block d-xl-flex align-items-end">
+                <h3 class="tx-normal tx-rubik mg-b-0 mg-r-5 lh-1">3,137</h3>
+                <p class="tx-11 tx-color-03 mg-b-0"><span class="tx-medium tx-danger d-inline-flex align-items-center">0.7% <ion-icon name="arrow-down-outline"></ion-icon></span> than last week</p>
+              </div>
+              <div class="chart-three">
+                  <div id="flotChart4" class="flot-chart ht-30"></div>
+                </div><!-- chart-three -->
+            </div>
+          </div><!-- col -->
+          <div class="col-sm-6 col-lg-3 mg-t-10 mg-lg-t-0">
+            <div class="card card-body">
+              <h6 class="tx-uppercase tx-11 tx-spacing-1 tx-color-02 tx-semibold mg-b-8">Avg. Order Value</h6>
+              <div class="d-flex d-lg-block d-xl-flex align-items-end">
+                <h3 class="tx-normal tx-rubik mg-b-0 mg-r-5 lh-1">$306.20</h3>
+                <p class="tx-11 tx-color-03 mg-b-0"><span class="tx-medium tx-danger d-inline-flex align-items-center">0.3% <ion-icon name="arrow-down-outline"></ion-icon></span> than last week</p>
+              </div>
+              <div class="chart-three">
+                  <div id="flotChart5" class="flot-chart ht-30"></div>
+                </div><!-- chart-three -->
+            </div>
+          </div><!-- col -->
+          <div class="col-sm-6 col-lg-3 mg-t-10 mg-lg-t-0">
+            <div class="card card-body">
+              <h6 class="tx-uppercase tx-11 tx-spacing-1 tx-color-02 tx-semibold mg-b-8">Order Quantity</h6>
+              <div class="d-flex d-lg-block d-xl-flex align-items-end">
+                <h3 class="tx-normal tx-rubik mg-b-0 mg-r-5 lh-1">1,650</h3>
+                <p class="tx-11 tx-color-03 mg-b-0"><span class="tx-medium tx-success d-inline-flex align-items-center">2.1% <ion-icon name="arrow-up-outline"></ion-icon></span> than last week</p>
+              </div>
+              <div class="chart-three">
+                  <div id="flotChart6" class="flot-chart ht-30"></div>
+                </div><!-- chart-three -->
+            </div>
+          </div>
+        </div>
+        <div data-label="Data" class="df-example demo-table">
+          <table id="example4" class="table">
+            <thead>
+              <tr>
+                <th class="wd-10p">Name</th>
+                <th class="wd-10p">Description</th>
+                <th class="wd-10p">Start Date</th>
+                <th class="wd-10p">End Date</th>
+                <th class="wd-10p">Budget</th>
+                <th class="wd-5p">Action</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <script src="../../lib/jquery/jquery.min.js"></script>
+    <script src="../../lib/jqueryui/jquery-ui.min.js"></script>
     <script src="../../lib/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="../../lib/feather-icons/feather.min.js"></script>
     <script src="../../lib/perfect-scrollbar/perfect-scrollbar.min.js"></script>
@@ -86,34 +239,225 @@
     <script src="../../lib/select2/js/select2.min.js"></script>
 
     <script src="../../assets/js/dashforge.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../../lib/jquery.flot/jquery.flot.js"></script>
+    <script src="../../lib/jquery.flot/jquery.flot.stack.js"></script>
+    <script src="../../lib/jquery.flot/jquery.flot.resize.js"></script>
+    <script src="../../assets/js/dashforge.sampledata.js"></script>
+    <script src="../lib/cleave.js/cleave.min.js"></script>
     <script>
+      var cleaveA = new Cleave('#inputBudget', {
+        numeral: true,
+        numeralThousandsGroupStyle: 'thousand'
+      });
+      var cleaveB = new Cleave('#inputChangeBudget', {
+        numeral: true,
+        numeralThousandsGroupStyle: 'thousand'
+      });
+      var cleaveC = new Cleave('#inputAddBudget', {
+        numeral: true,
+        numeralThousandsGroupStyle: 'thousand'
+      });
       $(function(){
         'use strict'
 
-        $('#example4').DataTable({
-          responsive: true,
-          'ajax': '../assets/data/datatable-objects.txt',
-          "columns": [
-            { "data": "name" },
-            { "data": "position" },
-            { "data": "office" },
-            { "data": "extn" },
-            { "data": "salary" },
-            { "data": null,
-              "render": function(data, type, row) {
-                return `
-                <button class="btn btn-sm btn-primary edit-btn" data-id="${row.id}">Edit</button>
-                <button class="btn btn-sm btn-danger delete-btn" data-id="${row.id}">Delete</button>
-              `;
+        $('#datepicker1').datepicker();
+
+        $('#datepicker2').datepicker();
+
+        $('#datepicker3').datepicker();
+
+        $('#datepicker4').datepicker();
+
+        $('#datepicker5').datepicker();
+
+        $('#datepicker6').datepicker();
+
+        $.plot('#flotChart3', [{
+          data: df4,
+          color: '#9db2c6'
+        }], {
+          series: {
+            shadowSize: 0,
+            lines: {
+              show: true,
+              lineWidth: 2,
+              fill: true,
+              fillColor: { colors: [ { opacity: 0 }, { opacity: .5 } ] }
             }
-            }
-          ],
-          language: {
-            searchPlaceholder: 'Search...',
-            sSearch: '',
-            lengthMenu: '_MENU_ items/page',
-          }
+          },
+          grid: {
+            borderWidth: 0,
+            labelMargin: 0
+          },
+          yaxis: {
+            show: false,
+            min: 0,
+            max: 60
+          },
+          xaxis: { show: false }
         });
+
+        $.plot('#flotChart4', [{
+            data: df5,
+            color: '#9db2c6'
+          }], {
+          series: {
+            shadowSize: 0,
+            lines: {
+              show: true,
+              lineWidth: 2,
+              fill: true,
+              fillColor: { colors: [ { opacity: 0 }, { opacity: .5 } ] }
+            }
+          },
+          grid: {
+            borderWidth: 0,
+            labelMargin: 0
+          },
+          yaxis: {
+            show: false,
+            min: 0,
+            max: 80
+          },
+          xaxis: { show: false }
+        });
+
+        $.plot('#flotChart5', [{
+            data: df6,
+            color: '#9db2c6'
+          }], {
+          series: {
+            shadowSize: 0,
+            lines: {
+              show: true,
+              lineWidth: 2,
+              fill: true,
+              fillColor: { colors: [ { opacity: 0 }, { opacity: .5 } ] }
+            }
+          },
+          grid: {
+            borderWidth: 0,
+            labelMargin: 0
+          },
+          yaxis: {
+            show: false,
+            min: 0,
+            max: 80
+          },
+          xaxis: { show: false }
+        });
+
+        $.plot('#flotChart6', [{
+            data: df4,
+            color: '#9db2c6'
+          }], {
+          series: {
+            shadowSize: 0,
+            lines: {
+              show: true,
+              lineWidth: 2,
+              fill: true,
+              fillColor: { colors: [ { opacity: 0 }, { opacity: .5 } ] }
+            }
+          },
+          grid: {
+            borderWidth: 0,
+            labelMargin: 0
+          },
+          yaxis: {
+            show: false,
+            min: 0,
+            max: 60
+          },
+          xaxis: { show: false }
+        });
+      })
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+
+        // Format tanggal: "21 Februari 2025 23.56.44"
+        const formattedDate = new Intl.DateTimeFormat('id-ID', {
+            day: '2-digit', month: 'long', year: 'numeric'
+        }).format(date);
+
+        const formattedTime = new Intl.DateTimeFormat('id-ID', {
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: false
+        }).format(date);
+
+        return `${formattedDate} ${formattedTime}`;
+      }
+        'use strict'
+
+        $(document).ready(function () {
+          let table;
+          axios.get('/campaign/list')
+              .then(response => {
+                  let campaigns = response.data.campaigns;
+                  if ($.fn.DataTable.isDataTable('#example4')) {
+                    table.clear().rows.add(campaigns).draw();
+                  } else {
+                    table = $('#example4').DataTable({
+                      responsive: true,
+                      data: campaigns,
+                      columns: [
+                          { data: 'name' },
+                          { data: 'description' },
+                          {
+                            "data": "start_date",
+                            "render": function(data) {
+                                return formatDate(data);
+                            }
+                          },
+                          {
+                            "data": "end_date",
+                            "render": function(data) {
+                                return formatDate(data);
+                            }
+                          },
+                          { data: 'budget' },
+                          { data: null,
+                            render: function (data, type, row) {
+                                return `
+                                    <button class="btn btn-sm btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#update" data-id="${row.id}">Edit</button>
+                                    <button class="btn btn-sm btn-danger delete-btn" data-id="${row.id}">Delete</button>
+                                `;
+                            }
+                          }
+                      ],
+                      language: {
+                          searchPlaceholder: 'Search...',
+                          sSearch: '',
+                          lengthMenu: '_MENU_ items/page',
+                      }
+                  });
+                }
+                $('#example4 tbody').on('click', '.delete-btn', function() {
+                let campaignId = $(this).data('id');
+                $('#modal5 .modal-body p').text(`Apakah Anda yakin ingin menghapus campaign dengan ID ${campaignId}?`);
+
+                $('#modal5').data('campaign-id', campaignId).modal('show');
+
+                $('#modal5 .btn-primary').on('click', function () {
+                  let campaignId = $('#modal5').data('campaign-id');
+
+                  axios.delete(`/campaign/${campaignId}`)
+                  .then(response => {
+                    alert('Campaign berhasil dihapus!');
+                    table.row($(`button.delete-btn[data-id="${campaignId}"]`).closest('tr')).remove().draw();
+                    $('#modal5').modal('hide');
+                  })
+                  .catch(error => {
+                    console.error('Gagal menghapus campaign:', error);
+                    alert('Terjadi kesalahan saat menghapus campaign.');
+                  });
+                });
+              });
+            })
+            .catch(error => {
+              console.error('Error fetching campaigns:', error);
+            });
 
         // Select2
         $('.dataTables_length select').select2({ minimumResultsForSearch: Infinity });
