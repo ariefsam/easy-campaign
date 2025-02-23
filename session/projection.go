@@ -15,6 +15,14 @@ type sessionService struct {
 	db *gorm.DB
 }
 
+func (s *sessionService) GetGroupName() string {
+	return "Session"
+}
+
+func (s *sessionService) SubscribedTo() []string {
+	return []string{"Session"}
+}
+
 func New() (s *sessionService, err error) {
 	client, err := gorm.Open(sqlite.Open("session.db"), &gorm.Config{})
 	if err != nil {
@@ -118,8 +126,15 @@ func (s *sessionService) GetSession(loginID string) (sess *Session, err error) {
 	return
 }
 
-func (s *sessionService) GetCursor() (cursor Cursor, err error) {
-	cursor = Cursor{}
+func (s *sessionService) GetCursor() (eventID string, err error) {
+	cursor := Cursor{}
 	err = s.db.Last(&cursor).Error
+	if err != nil {
+		err = errors.Wrap(err, "failed to get cursor")
+		logger.Println(err)
+		return
+	}
+
+	eventID = cursor.EventID
 	return
 }

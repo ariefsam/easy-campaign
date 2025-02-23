@@ -36,5 +36,5 @@ func Test_sessionService_Project(t *testing.T) {
 	cursor, err := sessionService.GetCursor()
 	require.NoError(t, err)
 	require.NotNil(t, cursor)
-	require.Equal(t, "e1", cursor.EventID)
+	require.Equal(t, "e1", cursor)
 }
