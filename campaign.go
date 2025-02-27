@@ -54,11 +54,6 @@ func (campaign *CampaignService) CreateCampaign(ctx context.Context, payload *Re
 	event.Campaign.CampaignCreated.EndDate = payload.CreateCampaignRequest.EndDate
 	event.Campaign.CampaignCreated.Budget = payload.CreateCampaignRequest.Budget
 
-	err = campaign.campaignWriter.Project(ctx, "", event, time.Now())
-	if err != nil {
-		logger.Error(err)
-		return
-	}
 	err = campaign.eventStore.Save(ctx, event)
 	if err != nil {
 		logger.Error(err)
@@ -148,11 +143,6 @@ func (campaign *CampaignService) UpdateCampaign(ctx context.Context, payload *Re
 	event.Campaign.CampaignUpdated.ChangeEndDate = payload.UpdateCampaignRequest.ChangeEndDate
 	event.Campaign.CampaignUpdated.ChangeBudget = payload.UpdateCampaignRequest.ChangeBudget
 
-	err = campaign.campaignWriter.Project(ctx, "", event, time.Now())
-	if err != nil {
-		logger.Error(err)
-		return
-	}
 	err = campaign.eventStore.Save(ctx, event)
 	if err != nil {
 		logger.Error(err)

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+
+	"github.com/getsentry/sentry-go"
 )
 
 func PrintJSON(input interface{}) {
@@ -37,6 +39,7 @@ func Println(input ...interface{}) {
 func Error(err error) {
 	_, filename, line, _ := runtime.Caller(1)
 	fmt.Println(filename, line, err)
+	sentry.CaptureException(err)
 }
 
 func JSON(input interface{}) string {

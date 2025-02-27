@@ -22,8 +22,8 @@ func TestExtractEvent(t *testing.T) {
 		require.NoError(t, err)
 
 		entityName, eventName := ExtractEvent(event)
-		require.Equal(t, "User", entityName)
-		require.Equal(t, "UserCreated", eventName)
+		require.Equal(t, "user", entityName)
+		require.Equal(t, "user_created", eventName)
 	})
 
 	t.Run("ProfileUpdatedRequested", func(t *testing.T) {
@@ -39,12 +39,13 @@ func TestExtractEvent(t *testing.T) {
 		require.NoError(t, err)
 
 		entityName, eventName := ExtractEvent(event)
-		require.Equal(t, "User", entityName)
-		require.Equal(t, "ProfileUpdatedRequested", eventName)
+		require.Equal(t, "user", entityName)
+		require.Equal(t, "profile_updated_requested", eventName)
 	})
 
 	t.Run("Extract List Entities", func(t *testing.T) {
-		entities := ExtractListEntities(&Event{})
+		event := Event{}
+		entities := event.GetEntityList()
 		require.NotEmpty(t, entities)
 
 		logger.PrintJSON(entities)

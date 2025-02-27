@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"reflect"
+	"encoding/json"
 	"time"
 )
 
@@ -90,27 +90,30 @@ type Event struct {
 	} `json:"campaign,omitzero"`
 }
 
-func ExtractEvent(event any) (entityName string, eventName string) {
-	v := reflect.ValueOf(event)
-	for i := 0; i < v.NumField(); i++ {
-		entity := v.Field(i)
-		entityType := v.Type().Field(i).Name
-		for j := 0; j < entity.NumField(); j++ {
-			event := entity.Field(j)
-			if !event.IsZero() {
-				eventType := entity.Type().Field(j).Name
-				return entityType, eventType
-			}
-		}
+func (e *Event) GetEntityList() (entityList []string) {
+	entityList = []string{
+		"user", "auth", "session", "influencer", "instagram_account", "campaign",
 	}
-	return "", ""
+
+	return
 }
 
-func ExtractListEntities(event any) (entities []string) {
-	v := reflect.ValueOf(event)
-	for i := 0; i < v.NumField(); i++ {
-		entity := v.Type().Field(i).Name
-		entities = append(entities, entity)
+func ExtractEvent(event any) (entityName string, eventName string) {
+
+	data, err := json.Marshal(event)
+	if err != nil {
+		return "", ""
 	}
-	return entities
+
+	var result map[string]map[string]any
+	if err := json.Unmarshal(data, &result); err != nil {
+		return "", ""
+	}
+
+	for entityName, events := range result {
+		for eventName := range events {
+			return entityName, eventName
+		}
+	}
+	return
 }

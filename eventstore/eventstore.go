@@ -7,13 +7,14 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"sync"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/pkg/errors"
 	redis "github.com/redis/go-redis/v9"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 type eventStoreService struct {
@@ -31,7 +32,9 @@ type Event struct {
 }
 
 func New(ctx context.Context) (es *eventStoreService, err error) {
-	client, err := gorm.Open(sqlite.Open("event.db"), &gorm.Config{})
+	client, err := gorm.Open(sqlite.Open("event.db"), &gorm.Config{
+		Logger: gormlogger.Default.LogMode(gormlogger.Silent),
+	})
 	if err != nil {
 		err = errors.Wrap(err, "failed to connect to database")
 		logger.Println(err)
@@ -64,14 +67,8 @@ func New(ctx context.Context) (es *eventStoreService, err error) {
 		logger.Println(err)
 	}
 
-	once.Do(func() {
-		go es.StoreEvent(ctx)
-	})
-
 	return
 }
-
-var once sync.Once
 
 func (es *eventStoreService) Save(ctx context.Context, eventData dto.Event) (err error) {
 	jsonData, err := json.Marshal(eventData)
@@ -103,15 +100,20 @@ func (es *eventStoreService) Save(ctx context.Context, eventData dto.Event) (err
 	return
 }
 
+func (es *eventStoreService) GetRedisClient() *redis.Client {
+	return es.redisClient
+}
+
 func (es *eventStoreService) StoreEvent(ctx context.Context) {
 	idService := idgenerator.New()
 	consumer := idService.Generate(ctx)
 	groupName := "eventstore"
-	entities := dto.ExtractListEntities(dto.Event{})
+	ev := dto.Event{}
+	entities := ev.GetEntityList()
 
 	lastEvent := Event{}
 
-	es.db.Debug().Last(&lastEvent)
+	es.db.Last(&lastEvent)
 	if lastEvent.EventID == "" {
 		lastEvent.EventID = "0"
 	}
@@ -121,7 +123,6 @@ func (es *eventStoreService) StoreEvent(ctx context.Context) {
 		if err != nil {
 			err = errors.Wrap(err, "failed to register group")
 			logger.Println(err)
-			panic(err)
 		}
 	}
 
@@ -154,6 +155,7 @@ func (es *eventStoreService) StoreEvent(ctx context.Context) {
 			}
 			logger.Println("failed to read group: ", resp.Err())
 			time.Sleep(1 * time.Second)
+			sentry.CaptureException(resp.Err())
 			continue
 		}
 
@@ -164,7 +166,6 @@ func (es *eventStoreService) StoreEvent(ctx context.Context) {
 			messages := stream.Messages
 
 			for _, message := range messages {
-				logger.PrintJSON(message.Values)
 				dateTime, _ := time.Parse(time.RFC3339, message.Values["time"].(string))
 				event := Event{
 					EventID:  message.ID,
@@ -177,11 +178,10 @@ func (es *eventStoreService) StoreEvent(ctx context.Context) {
 				err := es.db.Create(&event).Error
 				if err != nil {
 					err = errors.Wrap(err, "failed to create event")
-					logger.Println(err)
+					logger.Error(err)
 					continue
 				}
 
-				logger.PrintJSON(event)
 				es.redisClient.XAck(ctx2, streamName, groupName, message.ID)
 
 			}
@@ -193,7 +193,14 @@ func (es *eventStoreService) StoreEvent(ctx context.Context) {
 
 func (es *eventStoreService) RegisterGroup(ctx context.Context, key, groupName, fromID string) (err error) {
 
-	es.redisClient.XGroupCreateMkStream(ctx, key, groupName, "0")
+	crtStream := es.redisClient.XGroupCreateMkStream(ctx, key, groupName, "0")
+	if crtStream.Err() != nil {
+		if crtStream.Err().Error() == "BUSYGROUP Consumer Group name already exists" {
+			return
+		}
+		logger.Println("key:", key, "groupName:", groupName, "fromID:", fromID, ".failed to create stream:"+crtStream.Err().Error())
+		return
+	}
 
 	resp := es.redisClient.XInfoConsumers(ctx, key, groupName)
 	consumers := resp.Val()
@@ -204,7 +211,7 @@ func (es *eventStoreService) RegisterGroup(ctx context.Context, key, groupName, 
 	res := es.redisClient.XGroupCreate(ctx, key, groupName, fromID)
 	err = res.Err()
 	if err != nil {
-		logger.Println("failed to create group: " + err.Error())
+		logger.Println("key:", key, "groupName:", groupName, "fromID:", fromID, ". failed to create group: "+err.Error())
 		return
 	}
 

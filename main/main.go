@@ -3,10 +3,10 @@ package main
 import (
 	"campaign"
 	"campaign/logger"
+	"campaign/projection"
 	"campaign/session"
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -24,6 +24,7 @@ type campaignHandler struct {
 }
 
 func main() {
+	ctx := context.TODO()
 	godotenv.Load()
 
 	authService, err := campaign.NewAuthService()
@@ -44,7 +45,9 @@ func main() {
 		return
 	}
 
-	log.Println(session)
+	projectionService := projection.New()
+	projectionService.Register(session)
+	go projectionService.Run(ctx)
 
 	influencerService := campaign.NewInfluencerService()
 

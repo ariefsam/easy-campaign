@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 type sessionService struct {
@@ -16,15 +17,17 @@ type sessionService struct {
 }
 
 func (s *sessionService) GetGroupName() string {
-	return "Session"
+	return "session_worker"
 }
 
 func (s *sessionService) SubscribedTo() []string {
-	return []string{"Session"}
+	return []string{"session"}
 }
 
 func New() (s *sessionService, err error) {
-	client, err := gorm.Open(sqlite.Open("session.db"), &gorm.Config{})
+	client, err := gorm.Open(sqlite.Open("session.db"), &gorm.Config{
+		Logger: gormlogger.Default.LogMode(gormlogger.Silent),
+	})
 	if err != nil {
 		err = errors.Wrap(err, "failed to connect to database")
 		logger.Println(err)
@@ -73,12 +76,13 @@ type Session struct {
 
 func (s *sessionService) Project(ctx context.Context, eventID string, event dto.Event, dateTime time.Time) (err error) {
 	entity, eventName := dto.ExtractEvent(event)
-	if entity != "Session" {
+
+	if entity != "session" {
 		return
 	}
 
 	switch eventName {
-	case "LoginSucceeded":
+	case "login_succeeded":
 		err = s.loginSucceeded(ctx, eventID, event, dateTime)
 	}
 	return
@@ -106,8 +110,6 @@ func (s *sessionService) loginSucceeded(ctx context.Context, eventID string, eve
 			logger.Println(err)
 			return
 		}
-
-		logger.Println(resp.RowsAffected)
 
 		return
 	})
