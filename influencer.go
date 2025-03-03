@@ -11,6 +11,7 @@ import (
 
 type reportService interface {
 	FetchInfluencers() (influencers []report.Influencer, err error)
+	GetInfluencer(influencerID string) (influencer *report.Influencer, err error)
 }
 
 type InfluencerService struct {
@@ -77,6 +78,36 @@ func (s *InfluencerService) FetchInfluencers(ctx context.Context, payload *Reque
 	}
 
 	resp.Influencers = influencer
+
+	return
+}
+
+func (s *InfluencerService) UpdateInfluencer(ctx context.Context, payload *Request, state *InternalState, resp *Response) (err error) {
+
+	currentInfluencer, err := s.reportService.GetInfluencer(payload.UpdateInfluencerRequest.InfluencerID)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	if currentInfluencer == nil {
+		err = errors.New("influencer not found")
+		logger.Error(err)
+		return
+	}
+
+	event := dto.Event{}
+	event.Influencer.InfluencerUpdated.InfluencerID = payload.UpdateInfluencerRequest.InfluencerID
+	event.Influencer.InfluencerUpdated.Name = payload.UpdateInfluencerRequest.Name
+	event.Influencer.InfluencerUpdated.UpdatedBy = state.Session.UserID
+	err = s.eventStore.Save(ctx, event)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	resp.Influencer.InfluencerID = payload.UpdateInfluencerRequest.InfluencerID
+	resp.Influencer.Name = payload.UpdateInfluencerRequest.Name
 
 	return
 }

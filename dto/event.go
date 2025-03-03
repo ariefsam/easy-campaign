@@ -5,6 +5,14 @@ import (
 	"time"
 )
 
+/*
+expectEvent.Influencer.InfluencerUpdated.Name = "Ucup Edit"
+	expectEvent.Influencer.InfluencerUpdated.InstagramUsername = "ucupgramx"
+	expectEvent.Influencer.InfluencerUpdated.TiktokUsername = "ucuptoky"
+	expectEvent.Influencer.InfluencerUpdated.InfluencerID = expectID
+	expectEvent.Influencer.InfluencerUpdated.UpdatedBy = state.Session.UserID
+*/
+
 type Event struct {
 	User struct {
 		UserCreated struct {
@@ -50,6 +58,11 @@ type Event struct {
 			InstagramUsername string `json:"instagram_username,omitzero"`
 			CreatedBy         string `json:"created_by,omitzero"`
 		} `json:"influencer_created,omitzero"`
+		InfluencerUpdated struct {
+			InfluencerID string `json:"influencer_id,omitzero"`
+			Name         string `json:"name,omitzero"`
+			UpdatedBy    string `json:"updated_by,omitzero"`
+		} `json:"influencer_updated,omitzero"`
 	} `json:"influencer,omitzero"`
 	InstagramAccount struct {
 		AccountCreated struct {

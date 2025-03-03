@@ -39,4 +39,8 @@ type Request struct {
 		StartDate time.Time `json:"start_date,omitzero"`
 		EndDate   time.Time `json:"end_date,omitzero"`
 	} `json:"create_plan_request,omitzero"`
+	UpdateInfluencerRequest struct {
+		InfluencerID string `json:"influencer_id,omitzero"`
+		Name         string `json:"name,omitzero"`
+	} `json:"update_influencer_request,omitzero"`
 }

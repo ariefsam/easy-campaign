@@ -8,12 +8,10 @@ import (
 	"campaign/report"
 	"campaign/session"
 	"context"
-	"errors"
 	"log"
 	"testing"
 	"time"
 
-	"github.com/getsentry/sentry-go"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 )
@@ -21,9 +19,7 @@ import (
 func TestNew(t *testing.T) {
 
 	log.Default().SetFlags(log.LstdFlags | log.Llongfile)
-	ctx, cancel := context.WithCancel(context.Background())
-	spanSentry := sentry.StartSpan(ctx, "testStartSpan")
-	spanSentry.SetData("anu", "lalala")
+	ctx, _ := context.WithCancel(context.Background())
 
 	godotenv.Load()
 	var err error
@@ -91,10 +87,15 @@ func TestNew(t *testing.T) {
 		require.Equal(t, influencerName, influencers[0].Name)
 	}
 
-	sentry.CaptureException(errors.New("test error 2"))
-	time.Sleep(1 * time.Second)
+	influencer, err := reportService.GetInfluencer(influencers[0].InfluencerID)
+	require.Nil(t, err)
+	require.NotNil(t, influencer)
+	require.Equal(t, influencerName, influencer.Name)
+	require.NotEmpty(t, influencer.InfluencerID)
 
-	spanSentry.Finish()
-
-	cancel()
+	updateRequest := &campaign.Request{}
+	updateRequest.UpdateInfluencerRequest.InfluencerID = influencer.InfluencerID
+	updateRequest.UpdateInfluencerRequest.Name = "influencer2" + time.Now().String()
+	err = influencerService.UpdateInfluencer(ctx, updateRequest, state, resp)
+	require.Nil(t, err)
 }

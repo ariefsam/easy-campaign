@@ -161,3 +161,14 @@ func (r *reportService) FetchInfluencers() (influencers []Influencer, err error)
 	}
 	return
 }
+
+func (r *reportService) GetInfluencer(influencerID string) (influencer *Influencer, err error) {
+	influencer = &Influencer{}
+	err = r.db.Where("influencer_id = ?", influencerID).First(influencer).Error
+	if err != nil {
+		err = errors.Wrap(err, "failed to get influencer")
+		logger.Println(err)
+		return
+	}
+	return
+}
