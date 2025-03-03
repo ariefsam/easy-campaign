@@ -13,15 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"campaign/tracker"
-
 	"github.com/getsentry/sentry-go"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNew(t *testing.T) {
-	x := tracker.Init()
 
 	log.Default().SetFlags(log.LstdFlags | log.Llongfile)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -55,7 +52,7 @@ func TestNew(t *testing.T) {
 	projection.Register(sessionService)
 	go projection.Run(ctx)
 
-	influencerService := campaign.NewInfluencerService()
+	influencerService := campaign.NewInfluencerService(eventstoreService)
 
 	payload := &campaign.Request{}
 	payload.CreateInfluencerRequest.Name = "influencer1" + time.Now().String()
@@ -98,7 +95,6 @@ func TestNew(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	spanSentry.Finish()
-	x()
 
 	cancel()
 }

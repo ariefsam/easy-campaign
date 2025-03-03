@@ -34,6 +34,9 @@ func PrintJSONSimple(input interface{}) {
 func Println(input ...interface{}) {
 	_, filename, line, _ := runtime.Caller(1)
 	fmt.Println(filename, line, input)
+	// stackBuf := make([]byte, 1024)
+	// stackSize := runtime.Stack(stackBuf, false)
+	// fmt.Println("Stack trace:", string(stackBuf[:stackSize]))
 }
 
 func Error(err error) {

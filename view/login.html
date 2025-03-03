@@ -6,27 +6,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Twitter -->
-    <meta name="twitter:site" content="@themepixels">
-    <meta name="twitter:creator" content="@themepixels">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="DashForge">
-    <meta name="twitter:description" content="Responsive Bootstrap 5 Dashboard Template">
-    <meta name="twitter:image" content="http://themepixels.me/dashforge/img/dashforge-social.png">
-
-    <!-- Facebook -->
-    <meta property="og:url" content="http://themepixels.me/dashforge">
-    <meta property="og:title" content="DashForge">
-    <meta property="og:description" content="Responsive Bootstrap 5 Dashboard Template">
-
-    <meta property="og:image" content="http://themepixels.me/dashforge/img/dashforge-social.png">
-    <meta property="og:image:secure_url" content="http://themepixels.me/dashforge/img/dashforge-social.png">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="600">
 
     <!-- Meta -->
-    <meta name="description" content="Responsive Bootstrap 5 Dashboard Template">
+    <meta name="description" content="Identifikasi - Easy Campaign">
     <meta name="author" content="ThemePixels">
 
     <!-- Favicon -->
@@ -36,7 +18,7 @@
 
     <!-- vendor css -->
     <link href="../../lib/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="../../lib/ionicons/css/ionicons.min.css" rel="stylesheet">
+    {{/* <link href="../../lib/ionicons/css/ionicons.min.css" rel="stylesheet"> */}}
     <link href="../../lib/remixicon/fonts/remixicon.css" rel="stylesheet">
 
     <!-- DashForge CSS -->
@@ -74,9 +56,9 @@
             <div class="mx-wd-600">
               <img src="/assets/id/logo.webp" class="img-fluid" alt="">
             </div>
-            <div class="pos-absolute b-0 l-0 tx-12 tx-center">
+            {{/* <div class="pos-absolute b-0 l-0 tx-12 tx-center">
               Workspace design vector is created by <a href="https://www.freepik.com/pikisuperstar" target="_blank">pikisuperstar (freepik.com)</a>
-            </div>
+            </div> */}}
           </div><!-- media-body -->
           <div class="sign-wrapper mg-lg-l-50 mg-xl-l-60">
             <form method="POST" action="/login">
@@ -91,17 +73,17 @@
               <div class="form-group">
                 <div class="d-flex justify-content-between mg-b-5">
                   <label class="mg-b-0-f">Password</label>
-                  <a href="" class="tx-13">Forgot password?</a>
+                  {{/* <a href="" class="tx-13">Forgot password?</a> */}}
                 </div>
                 <input type="password" name="password" class="form-control" placeholder="Enter your password">
               </div>
               <button class="btn btn-brand-02 w-100" id="signinBtn">Sign In</button>
-              <div class="divider-text">or</div>
-              <div class="d-grid gap-2">
+              {{/* <div class="divider-text">or</div> */}}
+              {{/* <div class="d-grid gap-2">
                 <button class="btn btn-outline-facebook btn-block">Sign In With Facebook</button>
                 <button class="btn btn-outline-twitter btn-block">Sign In With Twitter</button>
               </div>
-              <div class="tx-13 mg-t-20 tx-center">Don't have an account? <a href="page-signup.html">Create an Account</a></div>
+              <div class="tx-13 mg-t-20 tx-center">Don't have an account? <a href="page-signup.html">Create an Account</a></div> */}}
             </div>
             </form>
           </div><!-- sign-wrapper -->
@@ -111,8 +93,8 @@
 
     <footer class="footer">
       <div>
-        <span>&copy; 2023 DashForge v1.0.0. </span>
-        <span>Created by <a href="http://themepixels.me">ThemePixels</a></span>
+        {{/* <span>&copy; 2023 DashForge v1.0.0. </span> */}}
+        {{/* <span>Created by <a href="http://themepixels.me">ThemePixels</a></span> */}}
       </div>
       <div>
         <nav class="nav">
@@ -145,14 +127,14 @@
             }
           };
           
-          axios.post('/login', JSON.stringify(data), {
+          axios.post('/api/login', JSON.stringify(data), {
             headers: {
               'Content-Type': 'application/json'
             }
             }).then(function(response){
             console.log(response);
-            if(response.data.status == 'success'){
-              window.location.href = '/dashboard';
+            if(response.data.auth){
+              window.location.href = '/influencer';
             }else{
               alert(response.data.message);
             }

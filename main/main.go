@@ -2,11 +2,15 @@ package main
 
 import (
 	"campaign"
+	"campaign/eventstore"
 	"campaign/logger"
 	"campaign/projection"
+	"campaign/report"
 	"campaign/session"
+	"campaign/tracker"
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -20,20 +24,15 @@ import (
 type campaignHandler struct {
 	authService       *campaign.AuthService
 	influencerService *campaign.InfluencerService
-	campaignService   *campaign.CampaignService
 }
 
 func main() {
+	log.Default().SetFlags(log.LstdFlags | log.Llongfile)
 	ctx := context.TODO()
 	godotenv.Load()
+	tracker.Init()
 
 	authService, err := campaign.NewAuthService()
-	if err != nil {
-		logger.Println(err)
-		return
-	}
-
-	campaignService, err := campaign.NewCampaignService()
 	if err != nil {
 		logger.Println(err)
 		return
@@ -45,43 +44,41 @@ func main() {
 		return
 	}
 
-	projectionService := projection.New()
-	projectionService.Register(session)
-	go projectionService.Run(ctx)
+	report := report.New()
 
-	influencerService := campaign.NewInfluencerService()
-
-	handler := &campaignHandler{
-		authService:     authService,
-		campaignService: campaignService,
+	eventstoreService, err := eventstore.New(ctx)
+	if err != nil {
+		logger.Println(err)
+		return
 	}
 
-	h := campaign.NewCampaignHandler(campaignService)
+	go eventstoreService.StoreEvent(ctx)
+
+	projectionService := projection.New()
+	projectionService.Register(session)
+	projectionService.Register(report)
+
+	go projectionService.Run(ctx)
+
+	influencerService := campaign.NewInfluencerService(eventstoreService)
+	influencerService.SetReportService(report)
+
+	handler := &campaignHandler{
+		authService: authService,
+	}
 
 	mux := mux.NewRouter()
 
-	mux.HandleFunc("/campaign", campaignView).Methods("GET")
-
-	mux.HandleFunc("/campaign/{id:[0-9]+}", h.DeleteCampaign).Methods("DELETE")
-	mux.HandleFunc("/campaign/{id:[0-9]+}", h.GetCampaign).Methods("GET")
-
-	mux.HandleFunc("/campaigns", handler.stepHandler([]campaign.Step{
-		campaignService.CreateCampaign,
-	})).Methods("POST")
-
-	mux.HandleFunc("/campaigns", handler.stepHandler([]campaign.Step{
-		campaignService.UpdateCampaign,
-	})).Methods("PUT")
-
-	mux.HandleFunc("/campaigns", handler.stepHandler([]campaign.Step{
-		campaignService.GetAllCampaigns,
-	})).Methods("GET")
-
 	mux.HandleFunc("/login", loginView).Methods("GET")
-	mux.HandleFunc("/login", handler.stepHandler([]campaign.Step{
+	mux.HandleFunc("/api/login", handler.stepHandler([]campaign.Step{
 		authService.Login,
 	})).Methods("POST")
-	mux.HandleFunc("/influencer/create", handler.stepHandler([]campaign.Step{
+
+	mux.HandleFunc("/influencer", influencerView).Methods("GET")
+	mux.HandleFunc("/api/influencer", handler.stepHandler([]campaign.Step{
+		influencerService.FetchInfluencers,
+	})).Methods("GET")
+	mux.HandleFunc("/api/influencer/create", handler.stepHandler([]campaign.Step{
 		influencerService.CreateInfluencer,
 	})).Methods("POST")
 

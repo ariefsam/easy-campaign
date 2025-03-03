@@ -44,9 +44,11 @@ type Event struct {
 	} `json:"session,omitzero"`
 	Influencer struct {
 		InfluencerCreated struct {
-			InfluencerID string `json:"influencer_id,omitzero"`
-			Name         string `json:"name,omitzero"`
-			CreatedBy    string `json:"created_by,omitzero"`
+			InfluencerID      string `json:"influencer_id,omitzero"`
+			Name              string `json:"name,omitzero"`
+			TiktokUsername    string `json:"tiktok_username,omitzero"`
+			InstagramUsername string `json:"instagram_username,omitzero"`
+			CreatedBy         string `json:"created_by,omitzero"`
 		} `json:"influencer_created,omitzero"`
 	} `json:"influencer,omitzero"`
 	InstagramAccount struct {
@@ -61,33 +63,19 @@ type Event struct {
 			APIRawResponse    string `json:"api_response,omitzero"`
 		} `json:"account_updated,omitzero"`
 	} `json:"instagram_account,omitzero"`
-	Campaign struct {
-		CampaignCreated struct {
-			ID          uint      `json:"id,omitzero"`
-			UserID      string    `json:"user_id,omitzero"`
-			Name        string    `json:"name,omitzero"`
-			Description string    `json:"description,omitzero"`
-			StartDate   time.Time `json:"start_date,omitzero"`
-			EndDate     time.Time `json:"end_date,omitzero"`
-			Budget      int64     `json:"budget,omitzero"`
-		} `json:"campaign_created,omitzero"`
-		CampaignUpdated struct {
-			ID              uint      `json:"id,omitzero"`
-			UserID          string    `json:"user_id,omitzero"`
-			Name            string    `json:"name,omitzero"`
-			Description     string    `json:"description,omitzero"`
-			StartDate       time.Time `json:"start_date,omitzero"`
-			EndDate         time.Time `json:"end_date,omitzero"`
-			Budget          int64     `json:"budget,omitzero"`
-			ChangeStartDate time.Time `json:"change_start_date,omitzero"`
-			ChangeEndDate   time.Time `json:"change_end_date,omitzero"`
-			ChangeBudget    int64     `json:"change_budget,omitzero"`
-			Status          string    `json:"status,omitzero"`
-		} `json:"campaign_updated,omitzero"`
-		CampaignDeleted struct {
-			ID uint `json:"id,omitzero"`
-		} `json:"campaign_deleted,omitzero"`
-	} `json:"campaign,omitzero"`
+	Plan Plan `json:"plan,omitzero"`
+}
+
+type Plan struct {
+	PlanCreated PlanCreated `json:"plan_created,omitzero"`
+}
+
+type PlanCreated struct {
+	PlanID    string    `json:"plan_id,omitzero"`
+	Name      string    `json:"name,omitzero"`
+	StartDate time.Time `json:"start_date,omitzero"`
+	EndDate   time.Time `json:"end_date,omitzero"`
+	CreatedBy string    `json:"created_by,omitzero"`
 }
 
 func (e *Event) GetEntityList() (entityList []string) {

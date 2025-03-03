@@ -1,0 +1,136 @@
+{{ define "content" }}
+<link href="../../lib/datatables.net-dt/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="../../lib/datatables.net-responsive-dt/css/responsive.dataTables.min.css" rel="stylesheet">
+<link href="../../lib/select2/css/select2.min.css" rel="stylesheet">
+<div class="container pd-x-0">
+    <div class="modal fade" id="newData" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content tx-14">
+                <form id="formNewData" action="form-validation.html" data-parsley-validate>
+                    <div class="form-group">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalLabel">New Influencer</h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true"></span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <label for="name" class="d-block">Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="Enter the influencer's name" required>
+                            <label for="tiktok" class="d-block">TikTok</label>
+                            <input type="text" name="tiktok_username" class="form-control" placeholder="Example: khalidbasalamahofficial">
+                            <label for="instagram" class="d-block">Instagram</label>
+                            <input type="text" name="instagram_username" class="form-control" placeholder="Example: khalidbasalamahofficial">
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary tx-13" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary tx-13">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="d-sm-flex align-items-center justify-content-between mg-b-20 mg-lg-b-25 mg-xl-b-30">
+        <div>
+            <h4 class="mg-b-0 tx-spacing--1">Influencers</h4>
+        </div>
+        <a href="#newData" class="btn btn-primary" data-bs-toggle="modal">New Influencer</a>
+    </div>
+
+    <div data-label="Data" class="df-example demo-table">
+        <table id="example4" class="table">
+            <thead>
+                <tr>
+                    <th class="wd-20p">Name</th>
+                    <th class="wd-5p">Action</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+{{ end }}
+
+{{ define "scripts" }}
+<script src="../../lib/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../../lib/datatables.net-dt/js/dataTables.dataTables.min.js"></script>
+<script src="../../lib/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+<script src="../../lib/datatables.net-responsive-dt/js/responsive.dataTables.min.js"></script>
+<script src="../../lib/select2/js/select2.min.js"></script>
+<script src="../lib/parsleyjs/parsley.min.js"></script>
+<script src="../../assets/js/axios.min.js"></script>
+<script>
+    $(function () {
+        'use strict'
+
+        $('#example4').DataTable({
+            responsive: true,
+            {{/* 'ajax': '../assets/data/datatable-objects.txt', */}}
+            'ajax': {
+                'url': '/api/influencer',
+                'dataSrc': 'influencers'
+            },
+            "columns": [
+                { "data": "name" },
+                {
+                    "data": null,
+                    "render": function (data, type, row) {
+                        return `
+                <button class="btn btn-sm btn-primary edit-btn" data-id="${row.id}">Edit</button>
+                <button class="btn btn-sm btn-danger delete-btn" data-id="${row.id}">Delete</button>
+              `;
+                    }
+                }
+            ],
+            language: {
+                searchPlaceholder: 'Search...',
+                sSearch: '',
+                lengthMenu: '_MENU_ items/page',
+            }
+        });
+
+        // Select2
+        $('.dataTables_length select').select2({ minimumResultsForSearch: Infinity });
+
+    });
+</script>
+<script>
+    $(function () {
+
+        $('#formNewData').parsley();
+
+        'use strict'
+
+        $('#formNewData').on('submit', function (e) {
+            e.preventDefault();
+            var data = $(this).serializeArray();
+            var obj = {};
+            data.map(function (x) {
+                obj[x.name] = x.value;
+            });
+
+            var dataSubmit = {
+                create_influencer_request: obj
+            };
+
+            axios.post('/api/influencer/create', JSON.stringify(dataSubmit), {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(function (response) {
+                console.log(response);
+                if (response.data.influencer) {
+                    setTimeout(function() {
+                        window.location.href = '/influencer';
+                    }, 1000);
+                }
+            }).catch(function (error) {
+                console.log(error);
+            });
+        });
+    });
+</script>
+{{ end }}

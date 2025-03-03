@@ -1,22 +1,6 @@
 package campaign
 
-import (
-	"context"
-	"time"
-)
-
-type Application struct {
-	Event Event `json:"event"`
-	API   API   `json:"api"`
-}
-
-type Step func(ctx context.Context, payload *Request, state *InternalState, resp *Response) (err error)
-
-type InternalState struct {
-	Session struct {
-		UserID string
-	}
-}
+import "time"
 
 type Response struct {
 	Error      string `json:"error,omitzero"`
@@ -57,29 +41,17 @@ type Response struct {
 	Influencer struct {
 		InfluencerID string `json:"influencer_id,omitzero"`
 		Name         string `json:"name,omitzero"`
-	}
+	} `json:"influencer,omitzero"`
+	Influencers []Influencer `json:"influencers,omitempty"`
+	Plan        struct {
+		PlanID    string    `json:"plan_id,omitzero"`
+		Name      string    `json:"name,omitzero"`
+		StartDate time.Time `json:"start_date,omitzero"`
+		EndDate   time.Time `json:"end_date,omitzero"`
+	} `json:"plan,omitzero"`
 }
 
-// func StepLogin
-
-// func RunApplication() {
-// 	authService := NewAuthService()
-// 	app := Application{
-// 		API: API{
-// 			Endpoints: []Endpoint{
-// 				{
-// 					URL:    "/user",
-// 					Method: []string{"POST"},
-// 					Steps: []Step{
-// 						authService.Login,
-// 					},
-// 				},
-// 			},
-// 		},
-// 	}
-
-// 	app.Event.User.UserCreated.Email = "arief@gmail.com"
-
-// 	js, _ := json.MarshalIndent(app, "", "  ")
-// 	log.Println(string(js))
-// }
+type Influencer struct {
+	InfluencerID string `json:"influencer_id,omitempty"`
+	Name         string `json:"name,omitempty"`
+}

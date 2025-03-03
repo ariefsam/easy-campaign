@@ -58,6 +58,7 @@ func (s *reportService) GetCursor() (eventID string, err error) {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			eventID = "0"
+			s.db.Create(&Cursor{EventID: "0"})
 			return
 		}
 		err = errors.Wrap(err, "failed to get cursor")
