@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,14 +11,19 @@ import (
 )
 
 func PrintJSON(input interface{}) {
-	b, err := json.MarshalIndent(input, "", "  ")
+	var b bytes.Buffer
+	writer := &b
+	encoder := json.NewEncoder(writer)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", "  ")
+	err := encoder.Encode(input)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
 	_, filename, line, _ := runtime.Caller(1)
-	fmt.Println(filename, line, string(b))
+	fmt.Println(filename, line, b.String())
 }
 
 func PrintJSONSimple(input interface{}) {
