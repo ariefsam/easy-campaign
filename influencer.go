@@ -83,7 +83,11 @@ func (s *InfluencerService) FetchInfluencers(ctx context.Context, payload *Reque
 }
 
 func (s *InfluencerService) UpdateInfluencer(ctx context.Context, payload *Request, state *InternalState, resp *Response) (err error) {
-
+	if s.reportService == nil {
+		err = errors.New("report service is not set")
+		logger.Error(err)
+		return
+	}
 	currentInfluencer, err := s.reportService.GetInfluencer(payload.UpdateInfluencerRequest.InfluencerID)
 	if err != nil {
 		logger.Error(err)
@@ -108,6 +112,34 @@ func (s *InfluencerService) UpdateInfluencer(ctx context.Context, payload *Reque
 
 	resp.Influencer.InfluencerID = payload.UpdateInfluencerRequest.InfluencerID
 	resp.Influencer.Name = payload.UpdateInfluencerRequest.Name
+
+	return
+}
+
+func (s *InfluencerService) DeleteInfluencer(ctx context.Context, payload *Request, state *InternalState, resp *Response) (err error) {
+
+	currentInfluencer, err := s.reportService.GetInfluencer(payload.DeleteInfluencerRequest.InfluencerID)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	if currentInfluencer == nil {
+		err = errors.New("influencer not found")
+		logger.Error(err)
+		return
+	}
+
+	event := dto.Event{}
+	event.Influencer.InfluencerDeleted.InfluencerID = payload.DeleteInfluencerRequest.InfluencerID
+	event.Influencer.InfluencerDeleted.DeletedBy = state.Session.UserID
+	err = s.eventStore.Save(ctx, event)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	resp.Influencer.InfluencerID = payload.DeleteInfluencerRequest.InfluencerID
 
 	return
 }

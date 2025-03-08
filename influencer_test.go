@@ -159,5 +159,33 @@ func TestUpdateInfluencerFailedNotExist(t *testing.T) {
 	require.Error(t, err)
 
 	mockReport.AssertCalled(t, "GetInfluencer", "ux123")
-	eventStore.AssertNotCalled(t, "Save", mock.Anything)
+	eventStore.AssertNotCalled(t, "Save", expectEvent)
+}
+
+func TestDeleteInfluencer(t *testing.T) {
+	eventStore := &mockEventStore{}
+	mockReport := &mockReportService{}
+	influencerService := campaign.NewInfluencerService(eventStore)
+	influencerService.SetReportService(mockReport)
+
+	ctx := context.TODO()
+	payload := &campaign.Request{}
+	payload.DeleteInfluencerRequest.InfluencerID = "ux123"
+	state := &campaign.InternalState{}
+	response := &campaign.Response{}
+
+	mockReport.On("GetInfluencer", payload.DeleteInfluencerRequest.InfluencerID).Return(&report.Influencer{
+		InfluencerID: "ux123",
+		Name:         "Ucup",
+	}, nil)
+
+	expectEvent := dto.Event{}
+	expectEvent.Influencer.InfluencerDeleted.InfluencerID = payload.DeleteInfluencerRequest.InfluencerID
+	expectEvent.Influencer.InfluencerDeleted.DeletedBy = state.Session.UserID
+
+	err := influencerService.DeleteInfluencer(ctx, payload, state, response)
+	require.NoError(t, err)
+
+	mockReport.AssertCalled(t, "GetInfluencer", "ux123")
+	eventStore.AssertCalled(t, "Save", expectEvent)
 }

@@ -9,6 +9,7 @@ import (
 	"campaign/session"
 	"context"
 	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -20,6 +21,12 @@ func TestNew(t *testing.T) {
 
 	log.Default().SetFlags(log.LstdFlags | log.Llongfile)
 	ctx, _ := context.WithCancel(context.Background())
+
+	func() {
+		os.Remove("report.db")
+		os.Remove("event.db")
+		os.Remove("session.db")
+	}()
 
 	godotenv.Load()
 	var err error
@@ -56,6 +63,7 @@ func TestNew(t *testing.T) {
 	state := &campaign.InternalState{}
 	resp := &campaign.Response{}
 	influencerService.CreateInfluencer(ctx, payload, state, resp)
+	influencerService.SetReportService(reportService)
 
 	authService, err := campaign.NewAuthService()
 	require.NoError(t, err)
@@ -68,7 +76,7 @@ func TestNew(t *testing.T) {
 	require.NoError(t, err)
 	token := resp.Auth.Token
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(300 * time.Millisecond)
 
 	sess, err := authService.ParseToken(ctx, token)
 	require.NoError(t, err)
@@ -98,4 +106,24 @@ func TestNew(t *testing.T) {
 	updateRequest.UpdateInfluencerRequest.Name = "influencer2" + time.Now().String()
 	err = influencerService.UpdateInfluencer(ctx, updateRequest, state, resp)
 	require.Nil(t, err)
+
+	time.Sleep(300 * time.Millisecond)
+	influencerCheck, err := reportService.GetInfluencer(influencers[0].InfluencerID)
+	require.Nil(t, err)
+	require.NotNil(t, influencerCheck)
+	require.Equal(t, updateRequest.UpdateInfluencerRequest.Name, influencerCheck.Name)
+
+	t.Run("delete influencer", func(t *testing.T) {
+		deleteRequest := &campaign.Request{}
+		deleteRequest.DeleteInfluencerRequest.InfluencerID = influencer.InfluencerID
+		err = influencerService.DeleteInfluencer(ctx, deleteRequest, state, resp)
+		require.Nil(t, err)
+
+		time.Sleep(300 * time.Millisecond)
+
+		influencer, err := reportService.GetInfluencer(influencers[0].InfluencerID)
+		require.Nil(t, err)
+		require.Nil(t, influencer)
+
+	})
 }

@@ -63,6 +63,10 @@ type Event struct {
 			Name         string `json:"name,omitzero"`
 			UpdatedBy    string `json:"updated_by,omitzero"`
 		} `json:"influencer_updated,omitzero"`
+		InfluencerDeleted struct {
+			InfluencerID string `json:"influencer_id,omitzero"`
+			DeletedBy    string `json:"deleted_by,omitzero"`
+		} `json:"influencer_deleted,omitzero"`
 	} `json:"influencer,omitzero"`
 	InstagramAccount struct {
 		AccountCreated struct {

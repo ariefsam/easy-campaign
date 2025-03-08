@@ -126,6 +126,10 @@ func (r *reportService) handleInfluencerEvent(ctx context.Context, eventID, even
 	switch eventName {
 	case "influencer_created":
 		i.handleInfluencerCreated(ctx, eventID, event, dateTime)
+	case "influencer_updated":
+		i.handleInfluencerUpdated(ctx, eventID, event, dateTime)
+	case "influencer_deleted":
+		i.handleInfluencerDeleted(ctx, eventID, event, dateTime)
 	}
 }
 
@@ -138,6 +142,49 @@ func (i *influencerHandler) handleInfluencerCreated(ctx context.Context, eventID
 		err = db.Create(&influencer).Error
 		if err != nil {
 			err = errors.Wrap(err, "failed to create influencer")
+			logger.Println(err)
+			return
+		}
+
+		resp := db.Model(&Cursor{}).Where("1 = 1").Update("EventID", eventID)
+		if resp.Error != nil {
+			err = errors.Wrap(resp.Error, "failed to update cursor")
+			logger.Println(err)
+			return
+		}
+		return
+	})
+}
+
+func (i *influencerHandler) handleInfluencerUpdated(ctx context.Context, eventID string, event dto.Event, dateTime time.Time) {
+	i.db.Transaction(func(db *gorm.DB) (err error) {
+		influencer := Influencer{
+			InfluencerID: event.Influencer.InfluencerUpdated.InfluencerID,
+			Name:         event.Influencer.InfluencerUpdated.Name,
+		}
+		err = db.Model(&Influencer{}).Where("influencer_id = ?", event.Influencer.InfluencerUpdated.InfluencerID).Updates(&influencer).Error
+		if err != nil {
+			err = errors.Wrap(err, "failed to update influencer")
+			logger.Println(err)
+			return
+		}
+
+		resp := db.Model(&Cursor{}).Where("1 = 1").Update("EventID", eventID)
+		if resp.Error != nil {
+			err = errors.Wrap(resp.Error, "failed to update cursor")
+			logger.Println(err)
+			return
+		}
+		return
+	})
+
+}
+
+func (i *influencerHandler) handleInfluencerDeleted(ctx context.Context, eventID string, event dto.Event, dateTime time.Time) {
+	i.db.Transaction(func(db *gorm.DB) (err error) {
+		err = db.Where("influencer_id = ?", event.Influencer.InfluencerDeleted.InfluencerID).Delete(&Influencer{}).Error
+		if err != nil {
+			err = errors.Wrap(err, "failed to delete influencer")
 			logger.Println(err)
 			return
 		}
@@ -166,6 +213,9 @@ func (r *reportService) GetInfluencer(influencerID string) (influencer *Influenc
 	influencer = &Influencer{}
 	err = r.db.Where("influencer_id = ?", influencerID).First(influencer).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		err = errors.Wrap(err, "failed to get influencer")
 		logger.Println(err)
 		return
