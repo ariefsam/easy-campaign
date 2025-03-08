@@ -19,10 +19,6 @@ type projection struct {
 	eventstore  *eventstore.EventStoreService
 }
 
-type eventstoreService interface {
-	GetRedisClient() *redis.Client
-}
-
 func New(es *eventstore.EventStoreService) *projection {
 	return &projection{
 		redisClient: es.GetRedisClient(),
@@ -69,7 +65,7 @@ func (es *projection) project(ctx context.Context, proj projector) (err error) {
 	streams = append(streams, entities...)
 	consumer := idgenerator.New().Generate(ctx)
 
-	for _ = range entities {
+	for range entities {
 		streams = append(streams, ">")
 	}
 

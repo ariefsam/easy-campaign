@@ -19,17 +19,12 @@ type AuthService struct {
 	idGenerator    idGenerator
 	tokenGenerator tokenGenerator
 	tokenParser    tokenParser
-	userReader     userReader
 }
 
 type User struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
-}
-
-type userReader interface {
-	GetByEmail(ctx context.Context, email string) (user User, err error)
 }
 
 type idGenerator interface {

@@ -130,7 +130,7 @@ func (es *EventStoreService) StoreEvent(ctx context.Context) {
 
 	streams = append(streams, entities...)
 
-	for _ = range entities {
+	for range entities {
 		streams = append(streams, ">")
 	}
 

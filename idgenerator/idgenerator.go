@@ -7,11 +7,6 @@ import (
 	"time"
 )
 
-type idGenerator interface {
-	Generate(ctx context.Context) string
-	GenerateUUID(ctx context.Context) string
-}
-
 type idgenerator struct{}
 
 func New() *idgenerator {

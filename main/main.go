@@ -22,8 +22,7 @@ import (
 )
 
 type campaignHandler struct {
-	authService       *campaign.AuthService
-	influencerService *campaign.InfluencerService
+	authService *campaign.AuthService
 }
 
 func main() {
