@@ -54,11 +54,11 @@ func main() {
 
 	go eventstoreService.StoreEvent(ctx)
 
-	projectionService := projection.New()
+	projectionService := projection.New(eventstoreService)
 	projectionService.Register(session)
 	projectionService.Register(report)
 
-	go projectionService.Run(ctx)
+	go projectionService.Run(ctx, "0")
 
 	influencerService := campaign.NewInfluencerService(eventstoreService)
 	influencerService.SetReportService(report)

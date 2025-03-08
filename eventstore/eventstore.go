@@ -17,7 +17,7 @@ import (
 	gormlogger "gorm.io/gorm/logger"
 )
 
-type eventStoreService struct {
+type EventStoreService struct {
 	db          *gorm.DB
 	redisClient *redis.Client
 }
@@ -31,7 +31,7 @@ type Event struct {
 	DateTime time.Time `json:"datetime"`
 }
 
-func New(ctx context.Context) (es *eventStoreService, err error) {
+func New(ctx context.Context) (es *EventStoreService, err error) {
 	client, err := gorm.Open(sqlite.Open("event.db"), &gorm.Config{
 		Logger: gormlogger.Default.LogMode(gormlogger.Silent),
 	})
@@ -56,7 +56,7 @@ func New(ctx context.Context) (es *eventStoreService, err error) {
 		DB:       0,             // use default DB
 	})
 
-	es = &eventStoreService{
+	es = &EventStoreService{
 		db:          client,
 		redisClient: rdb,
 	}
@@ -70,7 +70,7 @@ func New(ctx context.Context) (es *eventStoreService, err error) {
 	return
 }
 
-func (es *eventStoreService) Save(ctx context.Context, eventData dto.Event) (err error) {
+func (es *EventStoreService) Save(ctx context.Context, eventData dto.Event) (err error) {
 	jsonData, err := json.Marshal(eventData)
 	if err != nil {
 		err = errors.Wrap(err, "failed to marshal event")
@@ -100,11 +100,11 @@ func (es *eventStoreService) Save(ctx context.Context, eventData dto.Event) (err
 	return
 }
 
-func (es *eventStoreService) GetRedisClient() *redis.Client {
+func (es *EventStoreService) GetRedisClient() *redis.Client {
 	return es.redisClient
 }
 
-func (es *eventStoreService) StoreEvent(ctx context.Context) {
+func (es *EventStoreService) StoreEvent(ctx context.Context) {
 	idService := idgenerator.New()
 	consumer := idService.Generate(ctx)
 	groupName := "eventstore"
@@ -191,7 +191,7 @@ func (es *eventStoreService) StoreEvent(ctx context.Context) {
 
 }
 
-func (es *eventStoreService) RegisterGroup(ctx context.Context, key, groupName, fromID string) (err error) {
+func (es *EventStoreService) RegisterGroup(ctx context.Context, key, groupName, fromID string) (err error) {
 
 	crtStream := es.redisClient.XGroupCreateMkStream(ctx, key, groupName, "0")
 	if crtStream.Err() != nil {
@@ -213,6 +213,69 @@ func (es *eventStoreService) RegisterGroup(ctx context.Context, key, groupName, 
 	if err != nil {
 		logger.Println("key:", key, "groupName:", groupName, "fromID:", fromID, ". failed to create group: "+err.Error())
 		return
+	}
+
+	return
+}
+
+type ProjectionFunction func(ctx context.Context, eventID string, event dto.Event, dateTime time.Time) error
+
+func (es *EventStoreService) Replay(ctx context.Context, fromEvent string, projectionFunc []ProjectionFunction) (err error) {
+	event := Event{}
+	if fromEvent == "" || fromEvent == "0" {
+		err = es.db.First(&event).Error
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			err = errors.Wrap(err, "failed to get first event")
+			logger.Error(err)
+			return
+		}
+	} else {
+		err = es.db.First(&event, "event_id=?", fromEvent).Error
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			err = errors.Wrap(err, "failed to get event")
+			logger.Error(err)
+			return
+		}
+	}
+
+	logger.Println("replaying from event:", event.EventID)
+
+	rows, err := es.db.Model(&Event{}).Where("id > ?", event.ID).Rows()
+	if err != nil {
+		err = errors.Wrap(err, "failed to get rows")
+		logger.Error(err)
+		return
+	}
+
+	for rows.Next() {
+		event := Event{}
+		err = es.db.ScanRows(rows, &event)
+		if err != nil {
+			err = errors.Wrap(err, "failed to scan rows")
+			logger.Error(err)
+			continue
+		}
+
+		logger.PrintJSON("replaying event:")
+		logger.PrintJSON(event)
+
+		for _, proj := range projectionFunc {
+			dtoEvent := dto.Event{}
+			err = json.Unmarshal([]byte(event.Data), &dtoEvent)
+			if err != nil {
+				err = errors.Wrap(err, "failed to unmarshal event")
+				logger.Error(err)
+				continue
+			}
+
+			err = proj(ctx, event.EventID, dtoEvent, event.DateTime)
+			if err != nil {
+				err = errors.Wrap(err, "failed to project")
+				logger.Error(err)
+				continue
+			}
+		}
+
 	}
 
 	return

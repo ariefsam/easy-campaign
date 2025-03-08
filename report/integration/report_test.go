@@ -50,10 +50,10 @@ func TestNew(t *testing.T) {
 	sessionService, err := session.New()
 	require.NoError(t, err)
 
-	projection := projection.New()
+	projection := projection.New(eventstoreService)
 	projection.Register(reportService)
 	projection.Register(sessionService)
-	go projection.Run(ctx)
+	go projection.Run(ctx, "0")
 
 	influencerService := campaign.NewInfluencerService(eventstoreService)
 

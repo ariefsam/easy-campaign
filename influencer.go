@@ -72,8 +72,14 @@ func (s *InfluencerService) FetchInfluencers(ctx context.Context, payload *Reque
 	influencer := make([]Influencer, len(influencers))
 	for i, v := range influencers {
 		influencer[i] = Influencer{
-			InfluencerID: v.InfluencerID,
-			Name:         v.Name,
+			InfluencerID:               v.InfluencerID,
+			Name:                       v.Name,
+			InstagramUsername:          v.InstagramUsername,
+			TiktokUsername:             v.TiktokUsername,
+			IsInstagramUsernameValid:   v.IsInstagramUsernameValid,
+			IsTiktokUsernameValid:      v.IsTiktokUsernameValid,
+			LastCheckInstagramUsername: v.LastCheckInstagramUsername,
+			LastCheckTiktokUsername:    v.LastCheckTiktokUsername,
 		}
 	}
 

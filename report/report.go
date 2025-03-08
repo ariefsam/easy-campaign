@@ -42,6 +42,11 @@ func New() *reportService {
 	return report
 }
 
+func (r *reportService) Reset() {
+	r.db.Unscoped().Where("1 = 1").Delete(&Influencer{})
+	r.db.Unscoped().Where("1 = 1").Delete(&Cursor{})
+}
+
 func (r *reportService) GetGroupName() string {
 	return "report_worker"
 }
@@ -101,8 +106,14 @@ type campaignHandler struct {
 
 type Influencer struct {
 	gorm.Model
-	InfluencerID string `json:"influencer_id" gorm:"unique"`
-	Name         string `json:"name"`
+	InfluencerID               string    `json:"influencer_id" gorm:"unique"`
+	Name                       string    `json:"name"`
+	InstagramUsername          string    `json:"instagram_username"`
+	TiktokUsername             string    `json:"tiktok_username"`
+	IsInstagramUsernameValid   bool      `json:"is_instagram_username_valid"`
+	IsTiktokUsernameValid      bool      `json:"is_tiktok_username_valid"`
+	LastCheckInstagramUsername time.Time `json:"last_check_instagram_username"`
+	LastCheckTiktokUsername    time.Time `json:"last_check_tiktok_username"`
 }
 
 func (c *campaignHandler) handleCampaignCreated(ctx context.Context, eventID string, event dto.Event, dateTime time.Time) {
@@ -136,8 +147,14 @@ func (r *reportService) handleInfluencerEvent(ctx context.Context, eventID, even
 func (i *influencerHandler) handleInfluencerCreated(ctx context.Context, eventID string, event dto.Event, dateTime time.Time) {
 	i.db.Transaction(func(db *gorm.DB) (err error) {
 		influencer := Influencer{
-			InfluencerID: event.Influencer.InfluencerCreated.InfluencerID,
-			Name:         event.Influencer.InfluencerCreated.Name,
+			InfluencerID:               event.Influencer.InfluencerCreated.InfluencerID,
+			Name:                       event.Influencer.InfluencerCreated.Name,
+			InstagramUsername:          event.Influencer.InfluencerCreated.InstagramUsername,
+			TiktokUsername:             event.Influencer.InfluencerCreated.TiktokUsername,
+			IsInstagramUsernameValid:   false,
+			IsTiktokUsernameValid:      false,
+			LastCheckInstagramUsername: time.Time{},
+			LastCheckTiktokUsername:    time.Time{},
 		}
 		err = db.Create(&influencer).Error
 		if err != nil {

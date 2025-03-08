@@ -52,6 +52,12 @@ type Response struct {
 }
 
 type Influencer struct {
-	InfluencerID string `json:"influencer_id,omitempty"`
-	Name         string `json:"name,omitempty"`
+	InfluencerID               string    `json:"influencer_id,omitempty"`
+	Name                       string    `json:"name,omitempty"`
+	InstagramUsername          string    `json:"instagram_username,omitempty"`
+	TiktokUsername             string    `json:"tiktok_username,omitempty"`
+	IsInstagramUsernameValid   bool      `json:"is_instagram_username_valid,omitempty"`
+	IsTiktokUsernameValid      bool      `json:"is_tiktok_username_valid,omitempty"`
+	LastCheckInstagramUsername time.Time `json:"last_check_instagram_username,omitzero"`
+	LastCheckTiktokUsername    time.Time `json:"last_check_tiktok_username,omitzero"`
 }

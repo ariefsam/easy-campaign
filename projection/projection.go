@@ -9,29 +9,42 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/pkg/errors"
 	redis "github.com/redis/go-redis/v9"
 )
 
 type projection struct {
 	projectors  []projector
 	redisClient *redis.Client
+	eventstore  *eventstore.EventStoreService
 }
 
 type eventstoreService interface {
 	GetRedisClient() *redis.Client
 }
 
-func New() *projection {
-	es, err := eventstore.New(context.TODO())
-	if err != nil {
-		panic(err)
-	}
+func New(es *eventstore.EventStoreService) *projection {
 	return &projection{
 		redisClient: es.GetRedisClient(),
+		eventstore:  es,
 	}
 }
 
-func (p *projection) Run(ctx context.Context) (err error) {
+func (p *projection) Run(ctx context.Context, replayFrom string) (err error) {
+	if replayFrom != "" {
+		logger.Println("replaying from", replayFrom)
+		projFuncs := []eventstore.ProjectionFunction{}
+		for _, proj := range p.projectors {
+			proj.Reset()
+			projFuncs = append(projFuncs, proj.Project)
+		}
+		err = p.eventstore.Replay(ctx, replayFrom, projFuncs)
+		if err != nil {
+			logger.Error(err)
+			return
+		}
+
+	}
 	for _, proj := range p.projectors {
 		groupName := proj.GetGroupName()
 		keys := proj.SubscribedTo()
@@ -79,7 +92,8 @@ func (es *projection) project(ctx context.Context, proj projector) (err error) {
 			if resp.Err() == redis.Nil {
 				return
 			}
-			logger.Println("failed to read group: ", resp.Err())
+			err = errors.Wrap(resp.Err(), "failed to read group")
+			logger.Error(err)
 			time.Sleep(1 * time.Second)
 			continue
 		}
@@ -104,6 +118,7 @@ func (es *projection) project(ctx context.Context, proj projector) (err error) {
 }
 
 type projector interface {
+	Reset()
 	Project(ctx context.Context, eventID string, event dto.Event, dateTime time.Time) (err error)
 	SubscribedTo() []string
 	GetCursor() (eventID string, err error)
