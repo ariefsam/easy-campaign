@@ -39,6 +39,11 @@ func New() *reportService {
 		logger.Println(err)
 	}
 
+	err = report.db.AutoMigrate(&Plan{})
+	if err != nil {
+		logger.Println(err)
+	}
+
 	return report
 }
 
@@ -82,6 +87,8 @@ func (s *reportService) Project(ctx context.Context, eventID string, event dto.E
 		s.handleCampaignEvent(ctx, eventID, eventName, event, dateTime)
 	case "influencer":
 		s.handleInfluencerEvent(ctx, eventID, eventName, event, dateTime)
+	case "plan":
+		s.handlePlanEvent(ctx, eventID, eventName, event, dateTime)
 	}
 	return
 }

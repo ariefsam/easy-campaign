@@ -80,24 +80,31 @@ type Event struct {
 			APIRawResponse    string `json:"api_response,omitzero"`
 		} `json:"account_updated,omitzero"`
 	} `json:"instagram_account,omitzero"`
-	Plan Plan `json:"plan,omitzero"`
-}
-
-type Plan struct {
-	PlanCreated PlanCreated `json:"plan_created,omitzero"`
-}
-
-type PlanCreated struct {
-	PlanID    string    `json:"plan_id,omitzero"`
-	Name      string    `json:"name,omitzero"`
-	StartDate time.Time `json:"start_date,omitzero"`
-	EndDate   time.Time `json:"end_date,omitzero"`
-	CreatedBy string    `json:"created_by,omitzero"`
+	Plan struct {
+		PlanCreated struct {
+			PlanID    string    `json:"plan_id,omitzero"`
+			Name      string    `json:"name,omitzero"`
+			StartDate time.Time `json:"start_date,omitzero"`
+			EndDate   time.Time `json:"end_date,omitzero"`
+			CreatedBy string    `json:"created_by,omitzero"`
+		} `json:"plan_created,omitzero"`
+		PlanUpdated struct {
+			PlanID    string    `json:"plan_id,omitzero"`
+			Name      string    `json:"name,omitzero"`
+			StartDate time.Time `json:"start_date,omitzero"`
+			EndDate   time.Time `json:"end_date,omitzero"`
+			UpdatedBy string    `json:"updated_by,omitzero"`
+		} `json:"plan_updated,omitzero"`
+		PlanDeleted struct {
+			PlanID    string `json:"plan_id,omitzero"`
+			DeletedBy string `json:"deleted_by,omitzero"`
+		} `json:"plan_deleted,omitzero"`
+	} `json:"plan,omitzero"`
 }
 
 func (e *Event) GetEntityList() (entityList []string) {
 	entityList = []string{
-		"user", "auth", "session", "influencer", "instagram_account", "campaign",
+		"user", "auth", "session", "influencer", "instagram_account", "campaign", "plan",
 	}
 
 	return

@@ -253,7 +253,7 @@ func (es *EventStoreService) Replay(ctx context.Context, fromEvent string, proje
 		if err != nil {
 			err = errors.Wrap(err, "failed to scan rows")
 			logger.Error(err)
-			continue
+			return
 		}
 
 		logger.PrintJSON("replaying event:")

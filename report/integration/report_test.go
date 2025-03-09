@@ -17,7 +17,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNew(t *testing.T) {
+func TestReport(t *testing.T) {
+
+	waitDuration := 300 * time.Millisecond
 
 	log.Default().SetFlags(log.LstdFlags | log.Llongfile)
 	ctx, _ := context.WithCancel(context.Background())
@@ -53,7 +55,7 @@ func TestNew(t *testing.T) {
 	projection := projection.New(eventstoreService)
 	projection.Register(reportService)
 	projection.Register(sessionService)
-	go projection.Run(ctx, "0")
+	go projection.Run(ctx, "")
 
 	influencerService := campaign.NewInfluencerService(eventstoreService)
 
@@ -76,7 +78,7 @@ func TestNew(t *testing.T) {
 	require.NoError(t, err)
 	token := resp.Auth.Token
 
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(waitDuration)
 
 	sess, err := authService.ParseToken(ctx, token)
 	require.NoError(t, err)
@@ -107,7 +109,7 @@ func TestNew(t *testing.T) {
 	err = influencerService.UpdateInfluencer(ctx, updateRequest, state, resp)
 	require.Nil(t, err)
 
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(waitDuration)
 	influencerCheck, err := reportService.GetInfluencer(influencers[0].InfluencerID)
 	require.Nil(t, err)
 	require.NotNil(t, influencerCheck)
@@ -119,11 +121,72 @@ func TestNew(t *testing.T) {
 		err = influencerService.DeleteInfluencer(ctx, deleteRequest, state, resp)
 		require.Nil(t, err)
 
-		time.Sleep(300 * time.Millisecond)
+		time.Sleep(waitDuration)
 
 		influencer, err := reportService.GetInfluencer(influencers[0].InfluencerID)
 		require.Nil(t, err)
 		require.Nil(t, influencer)
 
+	})
+
+	t.Run("create plan", func(t *testing.T) {
+		planService := campaign.NewPlanService(eventstoreService)
+		planService.SetPlanProjection(reportService)
+
+		payload := &campaign.Request{}
+		payload.CreatePlanRequest.Name = "plan1" + time.Now().String()
+		payload.CreatePlanRequest.StartDate = time.Now()
+		payload.CreatePlanRequest.EndDate = time.Now().Add(100 * time.Hour)
+		state := &campaign.InternalState{}
+		resp := &campaign.Response{}
+
+		err := planService.Create(ctx, payload, state, resp)
+		require.Nil(t, err)
+
+		time.Sleep(waitDuration)
+
+		plans, err := reportService.FetchPlans()
+		require.Nil(t, err)
+		require.NotZero(t, len(plans))
+		if len(plans) > 0 {
+			require.Equal(t, payload.CreatePlanRequest.Name, plans[0].Name)
+		}
+
+		plan, err := reportService.GetPlan(plans[0].PlanID)
+		require.Nil(t, err)
+		require.NotNil(t, plan)
+		require.Equal(t, payload.CreatePlanRequest.Name, plan.Name)
+		require.NotEmpty(t, plan.PlanID)
+
+		t.Run("update plan", func(t *testing.T) {
+			updateRequest := &campaign.Request{}
+			updateRequest.UpdatePlanRequest.PlanID = plan.PlanID
+			updateRequest.UpdatePlanRequest.Name = "plan2" + time.Now().String()
+			updateRequest.UpdatePlanRequest.StartDate = time.Now()
+			updateRequest.UpdatePlanRequest.EndDate = time.Now().Add(200 * time.Hour)
+			err = planService.Update(ctx, updateRequest, state, resp)
+			require.Nil(t, err)
+
+			time.Sleep(waitDuration)
+
+			planCheck, err := reportService.GetPlan(plans[0].PlanID)
+			require.Nil(t, err)
+			require.NotNil(t, planCheck)
+			require.Equal(t, updateRequest.UpdatePlanRequest.Name, planCheck.Name)
+
+		})
+
+		t.Run("delete plan", func(t *testing.T) {
+			deleteRequest := &campaign.Request{}
+			deleteRequest.DeletePlanRequest.PlanID = plan.PlanID
+			err = planService.Delete(ctx, deleteRequest, state, resp)
+			require.Nil(t, err)
+
+			time.Sleep(waitDuration)
+
+			plan, err := reportService.GetPlan(plans[0].PlanID)
+			require.Nil(t, err)
+			require.Nil(t, plan)
+		})
 	})
 }

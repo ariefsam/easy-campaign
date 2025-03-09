@@ -46,4 +46,13 @@ type Request struct {
 	DeleteInfluencerRequest struct {
 		InfluencerID string `json:"influencer_id,omitzero"`
 	} `json:"delete_influencer_request,omitzero"`
+	UpdatePlanRequest struct {
+		PlanID    string    `json:"plan_id,omitzero"`
+		Name      string    `json:"name,omitzero"`
+		StartDate time.Time `json:"start_date,omitzero"`
+		EndDate   time.Time `json:"end_date,omitzero"`
+	} `json:"update_plan_request,omitzero"`
+	DeletePlanRequest struct {
+		PlanID string `json:"plan_id,omitzero"`
+	} `json:"delete_plan_request,omitzero"`
 }
