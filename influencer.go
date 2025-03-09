@@ -9,7 +9,7 @@ import (
 	"errors"
 )
 
-type reportService interface {
+type influencerProjection interface {
 	FetchInfluencers() (influencers []report.Influencer, err error)
 	GetInfluencer(influencerID string) (influencer *report.Influencer, err error)
 }
@@ -17,7 +17,7 @@ type reportService interface {
 type InfluencerService struct {
 	eventStore    eventStore
 	idGenerator   idGenerator
-	reportService reportService
+	reportService influencerProjection
 }
 
 func NewInfluencerService(es eventStore) *InfluencerService {
@@ -28,7 +28,7 @@ func NewInfluencerService(es eventStore) *InfluencerService {
 	}
 }
 
-func (s *InfluencerService) SetReportService(reportService reportService) {
+func (s *InfluencerService) SetReportService(reportService influencerProjection) {
 	s.reportService = reportService
 }
 
